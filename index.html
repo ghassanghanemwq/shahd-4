@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Shahd 4 Interactive Map</title>
+<title>Interactive 3D Map — Luxury Wine Red</title>
 
 <script type="importmap">
 {
@@ -19,7 +19,7 @@
     --bg:#0a0a0c; --text:#f3f3f7; --muted:#a8a8b8; --edge:#2a2a34;
     --primary:#8B0E2A; --primary-2:#A01832;
 
-    /* Your legend colors */
+    /* Legend colors */
     --available:#ffffff;   /* white  */
     --reserved:#9ad8ff;    /* baby blue */
     --sold:#df1a25;        /* red */
@@ -36,13 +36,26 @@
   #scene::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(1200px 700px at 50% 50%,transparent 40%,rgba(0,0,0,.35) 100%)}
   #loading{position:absolute;inset:0;display:grid;place-items:center;color:#d6d6e6;letter-spacing:.2em;text-transform:uppercase}
 
-  /* Hover tooltip (only on hover) */
+  /* BRAND – left, white */
+  #brand{
+    position:fixed; left:16px; top:16px; z-index:9;
+    display:flex; align-items:center; gap:10px; pointer-events:auto;
+  }
+  #brand img{
+    height:36px; filter:brightness(0) invert(1); /* force white */
+    opacity:.95; display:block;
+  }
+  @media (max-width:900px){
+    #brand img{ height:28px; }
+  }
+
+  /* Hover tooltip */
   #label{position:fixed;pointer-events:none;transform:translate(-50%,-120%);padding:6px 10px;background:rgba(15,15,20,.7);
     border:1px solid rgba(139,14,42,.35);border-radius:8px;color:#ffe6ea;font-weight:700;font-size:12px;box-shadow:0 8px 30px rgba(139,14,42,.25);display:none;z-index:6}
 
   /* Always-on lot labels */
   .lotLabel{
-    position:absolute;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(0,0,0,.65);
+    position:absolute;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(0,0,0,.55); /* slightly more transparent */
     color:#fff;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,.5);
     pointer-events:none;user-select:none;white-space:nowrap;backdrop-filter:blur(2px);transition:opacity .15s linear;
   }
@@ -84,6 +97,11 @@
 </style>
 </head>
 <body>
+  <!-- Brand logo (white) -->
+  <a id="brand" href="#" aria-label="Brand">
+    <img src="svg-01.svg" alt="Brand logo" />
+  </a>
+
   <div id="scene">
     <div id="loading">LOADING… 0%</div>
     <canvas id="c"></canvas>
@@ -176,7 +194,7 @@ const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 4000
 /* Orbit lock: never dip below */
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.maxPolarAngle = Math.PI * 0.49;
+controls.maxPolarAngle = Math.PI * 0.49;  // prevents hovering below model
 controls.minPolarAngle = 0.28;
 controls.enablePan = false;
 
@@ -215,18 +233,11 @@ const LOT_LABELS = new Map();
 const pad3 = n => String(n).padStart(3,'0');
 const normId = n => `Lot_${pad3(n)}`;
 
-/* Extract lot number from ANY object name:
-   - handles collection paths "Layer/Lot_149.001"
-   - accepts variants "Lot-149a", "lot 149", "LOT_0149.003"
-   - ignores non-lot names like "grass", "road"
-*/
+/* Extract lot number from ANY object name */
 function extractLotNumber(name){
   if(!name) return null;
-  // take last path segment if there are folders/pipes
   const base = name.split(/[\\/|]/).pop();
-  // strip common suffixes like ".001"
   const clean = base.replace(/\.\d+$/,'');
-  // find "lot" followed by optional separators and digits (1-4 digits)
   const m = clean.match(/lot[\s_\-]*0*(\d{1,4})/i);
   return m ? m[1] : null;
 }
@@ -348,7 +359,7 @@ function focusLot(idOrName){
   setSelected(obj);
 }
 
-/* Recolor lots from lots.json using your palette */
+/* Recolor lots from lots.json */
 function recolorByStatus(){
   if(!GLB) return;
   GLB.traverse(o=>{
@@ -391,7 +402,7 @@ function createPermanentLabels(){
 
     const el = document.createElement('div');
     el.className = 'lotLabel';
-    el.textContent = id.replace('Lot_',''); // 3-digit only
+    el.textContent = id.replace('Lot_','');
     el.style.opacity = '1';
 
     const css = new CSS2DObject(el);
@@ -402,7 +413,7 @@ function createPermanentLabels(){
   });
 }
 
-/* Fade labels when very close */
+/* Fade labels with zoom */
 function updateLabelOpacity(){
   const d = camera.position.distanceTo(controls.target);
   const t0 = 15, t1 = 40;
