@@ -16,78 +16,71 @@
 
 <style>
   :root{
-    --bg:#0a0a0c; --bg2:#0d0d12; --panel:#0e0e14;
-    --text:#f3f3f7; --muted:#a8a8b8;
-    --primary:#8B0E2A; /* Wine red */
-    --primary-2:#A01832;
-    --edge:#2a2a34;
+    --bg:#0a0a0c; --text:#f3f3f7; --muted:#a8a8b8; --edge:#2a2a34;
+    --primary:#8B0E2A; --primary-2:#A01832;
 
-    /* Legend (kept subtle) */
-    --ok:#19d27e; --warn:#ffc857; --bad:#ff5c7c;
+    /* Your legend colors */
+    --available:#ffffff;   /* white  */
+    --reserved:#9ad8ff;    /* baby blue */
+    --sold:#df1a25;        /* red */
   }
 
   html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-
-  /* Background: Dark Tech Nebula + scanlines + vignette */
   #scene{position:fixed;inset:0;background:
     radial-gradient(1400px 700px at 70% 35%, rgba(139,14,42,.12) 0%, rgba(139,14,42,0) 55%),
     radial-gradient(900px 520px at 20% 80%, rgba(160,24,50,.10) 0%, rgba(160,24,50,0) 60%),
     linear-gradient(180deg, #0a0a0c 0%, #0b0b10 50%, #0a0a0c 100%);
   }
-  canvas{display:block; width:100%; height:100%}
-  #scene::after{content:''; position:absolute; inset:0; pointer-events:none;
-    background:repeating-linear-gradient(transparent 0 2px, rgba(255,255,255,.02) 2px 3px)}
-  /* Vignette */
-  #scene::before{content:''; position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(1200px 700px at 50% 50%, transparent 40%, rgba(0,0,0,.35) 100%);}
+  canvas{display:block;width:100%;height:100%}
+  #scene::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 2px,rgba(255,255,255,.02) 2px 3px)}
+  #scene::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(1200px 700px at 50% 50%,transparent 40%,rgba(0,0,0,.35) 100%)}
+  #loading{position:absolute;inset:0;display:grid;place-items:center;color:#d6d6e6;letter-spacing:.2em;text-transform:uppercase}
 
-  #loading{position:absolute; inset:0; display:grid; place-items:center; color:#d6d6e6; letter-spacing:.2em; text-transform:uppercase}
+  /* Hover tooltip (only on hover) */
+  #label{position:fixed;pointer-events:none;transform:translate(-50%,-120%);padding:6px 10px;background:rgba(15,15,20,.7);
+    border:1px solid rgba(139,14,42,.35);border-radius:8px;color:#ffe6ea;font-weight:700;font-size:12px;box-shadow:0 8px 30px rgba(139,14,42,.25);display:none;z-index:6}
 
-  #label{position:fixed; pointer-events:none; transform:translate(-50%,-120%); padding:6px 10px;
-    background:rgba(15,15,20,.7); border:1px solid rgba(139,14,42,.35); border-radius:8px; color:#ffe6ea;
-    font-weight:700; font-size:12px; box-shadow:0 8px 30px rgba(139,14,42,.25); display:none; z-index:6}
+  /* Always-on lot labels */
+  .lotLabel{
+    position:absolute;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(0,0,0,.65);
+    color:#fff;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,.5);
+    pointer-events:none;user-select:none;white-space:nowrap;backdrop-filter:blur(2px);transition:opacity .15s linear;
+  }
 
-  #legend{position:fixed; left:12px; bottom:12px; display:flex; gap:8px; z-index:5}
-  .chip{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#13131b; border:1px solid var(--edge); color:var(--muted)}
-  .chip::before{content:''; width:8px; height:8px; border-radius:50%}
-  .ok::before{background:var(--ok)} .warn::before{background:var(--warn)} .bad::before{background:var(--bad)}
+  /* Legend */
+  #legend{position:fixed;left:12px;bottom:12px;display:flex;gap:8px;z-index:5}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#13131b;border:1px solid var(--edge);color:#d1d1dc}
+  .chip::before{content:'';width:8px;height:8px;border-radius:50%}
+  .chip.avail::before{background:var(--available)}
+  .chip.resv::before{background:var(--reserved)}
+  .chip.sold::before{background:var(--sold)}
 
   /* Search */
-  #searchWrap{position:fixed; top:16px; right:480px; z-index:7; width:min(420px,50vw)}
-  #search{width:100%; padding:12px 14px; border-radius:12px; border:1px solid #292937; background:#101018; color:var(--text); outline:none;
-    box-shadow:0 0 0 0 rgba(139,14,42,.0), 0 12px 24px rgba(0,0,0,.25); transition:box-shadow .2s ease, border-color .2s ease}
+  #searchWrap{position:fixed;top:16px;right:480px;z-index:7;width:min(420px,50vw)}
+  #search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #292937;background:#101018;color:var(--text);outline:none;
+    box-shadow:0 0 0 0 rgba(139,14,42,0),0 12px 24px rgba(0,0,0,.25);transition:box-shadow .2s ease,border-color .2s ease}
   #search::placeholder{color:#8f8fa4}
-  #search:focus{border-color:rgba(139,14,42,.55); box-shadow:0 0 0 3px rgba(139,14,42,.15), 0 20px 50px rgba(139,14,42,.15)}
-  #results{position:absolute; top:50px; left:0; right:0; background:#0f0f16; border:1px solid #262636; border-radius:12px; overflow:auto; max-height:42vh; box-shadow:0 22px 40px rgba(0,0,0,.45); display:none}
-  .result{display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; color:#f1dbe0}
-  .result:hover{background:#151520; box-shadow:inset 0 0 0 1px rgba(139,14,42,.25)}
-  .badge{font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid #3a3a4a; color:#f6c9cf; background:#1a1214; margin-left:auto}
+  #search:focus{border-color:rgba(139,14,42,.55);box-shadow:0 0 0 3px rgba(139,14,42,.15),0 20px 50px rgba(139,14,42,.15)}
+  #results{position:absolute;top:50px;left:0;right:0;background:#0f0f16;border:1px solid #262636;border-radius:12px;overflow:auto;max-height:42vh;box-shadow:0 22px 40px rgba(0,0,0,.45);display:none}
+  .result{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;color:#f1dbe0}
+  .result:hover{background:#151520;box-shadow:inset 0 0 0 1px rgba(139,14,42,.25)}
+  .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #3a3a4a;color:#f6c9cf;background:#1a1214;margin-left:auto}
 
   /* Drawer */
-  #drawer{position:fixed; top:0; right:0; bottom:0; width:380px; background:
-    linear-gradient(180deg, rgba(20,14,18,.85) 0%, rgba(10,10,14,.92) 100%);
-    backdrop-filter:blur(10px); border-left:1px solid #1e1e28; box-shadow:-10px 0 28px rgba(0,0,0,.4);
-    transform:translateX(100%); transition:transform .38s cubic-bezier(.2,.8,.2,1); z-index:6; overflow:auto}
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:380px;background:linear-gradient(180deg,rgba(20,14,18,.85) 0%,rgba(10,10,14,.92) 100%);
+    backdrop-filter:blur(10px);border-left:1px solid #1e1e28;box-shadow:-10px 0 28px rgba(0,0,0,.4);transform:translateX(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);z-index:6;overflow:auto}
   #drawer.open{transform:translateX(0)}
-  #drawer header{display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #222230; position:sticky; top:0; background:rgba(20,15,20,.8)}
-  #drawer header .title{font-weight:800; letter-spacing:.02em}
+  #drawer header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #222230;position:sticky;top:0;background:rgba(20,15,20,.8)}
+  #drawer header .title{font-weight:800;letter-spacing:.02em}
   #content{padding:16px}
-  .row{display:grid; grid-template-columns:110px 1fr; gap:10px; margin:10px 0}
-  .thumb{width:100%; border-radius:14px; border:1px solid #272734; background:#111118}
+  .row{display:grid;grid-template-columns:110px 1fr;gap:10px;margin:10px 0}
+  .thumb{width:100%;border-radius:14px;border:1px solid #272734;background:#111118}
   .muted{color:var(--muted)}
-  .ghost{width:100%; padding:12px 14px; border:1px solid #2a2a38; border-radius:12px; background:transparent; color:var(--text); font-weight:700; cursor:pointer}
-  .primary{width:100%; padding:12px 14px; border:0; border-radius:12px; background:linear-gradient(180deg,var(--primary),var(--primary-2)); color:#1b0a0f; font-weight:900; cursor:pointer; box-shadow:0 12px 30px rgba(139,14,42,.25); text-transform:uppercase; letter-spacing:.03em}
-  .primary:hover{filter:brightness(1.05)}
-
-  /* Executive Calm micro-animations */
-  .ghost, .primary{transition:transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease, filter .25s ease}
-  .ghost:hover{transform:translateY(-1px)}
-  .ghost:active{transform:translateY(0)}
-  .primary:hover{transform:translateY(-1px); box-shadow:0 14px 36px rgba(139,14,42,.26)}
-  .primary:active{transform:translateY(0); filter:brightness(.98)}
-
-  /* Monochrome luxury legend dots (visual only; mesh colors handled in JS) */
-  .ok::before{background:#b9b0b3} .warn::before{background:#8a8084} .bad::before{background:#5a5154}
+  .ghost{width:100%;padding:12px 14px;border:1px solid #2a2a38;border-radius:12px;background:transparent;color:var(--text);font-weight:700;cursor:pointer}
+  .primary{width:100%;padding:12px 14px;border:0;border-radius:12px;background:linear-gradient(180deg,var(--primary),var(--primary-2));color:#1b0a0f;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(139,14,42,.25);text-transform:uppercase;letter-spacing:.03em}
+  .ghost,.primary{transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease,filter .25s ease}
+  .ghost:hover{transform:translateY(-1px)}.ghost:active{transform:translateY(0)}
+  .primary:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(139,14,42,.26)}.primary:active{transform:translateY(0);filter:brightness(.98)}
 </style>
 </head>
 <body>
@@ -96,13 +89,13 @@
     <canvas id="c"></canvas>
     <div id="label"></div>
     <div id="legend">
-      <span class="chip ok">Available</span>
-      <span class="chip warn">Reserved</span>
-      <span class="chip bad">Sold</span>
+      <span class="chip avail">Available</span>
+      <span class="chip resv">Reserved</span>
+      <span class="chip sold">Sold</span>
     </div>
   </div>
 
-  <!-- Overlay Search -->
+  <!-- Search -->
   <div id="searchWrap">
     <input id="search" placeholder="Search lot (e.g. 012 or Lot_012)" />
     <div id="results"></div>
@@ -140,15 +133,16 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-/* ===== CONFIG ===== */
-const CONFIG = { glbUrl:'./map.glb', lotPrefix:'Lot_', highlight:0x8B0E2A };
+/* ========= CONFIG ========= */
+const CONFIG = { glbUrl:'./map.glb', highlight:0x8B0E2A };
 
-/* ===== DATA ===== */
+/* ========= DATA ========= */
 let RAW = {}, LOTS = {}, INDEX = [];
 fetch('lots.json').then(r=>r.json()).then(d=>{ RAW=d||{}; normalize(); }).catch(()=>{});
 
-/* ===== DOM ===== */
+/* ========= DOM ========= */
 const canvas = document.getElementById('c');
 const loading = document.getElementById('loading');
 const label   = document.getElementById('label');
@@ -164,13 +158,13 @@ const inquireBtn  = document.getElementById('inquireBtn');
 const search = document.getElementById('search');
 const results = document.getElementById('results');
 
-/* ===== THREE ===== */
+/* ========= THREE ========= */
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95; // adaptive baseline
+renderer.toneMappingExposure = 0.95;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -178,32 +172,65 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.03).texture
 scene.fog = new THREE.FogExp2(0x0b0b10, 0.0009);
 
 const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 4000);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.maxPolarAngle = Math.PI*0.49;
 
-// Lights
+/* Orbit lock: never dip below */
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI * 0.49;
+controls.minPolarAngle = 0.28;
+controls.enablePan = false;
+
+/* Lights & ground */
 const key = new THREE.DirectionalLight(0xffffff,1.05); key.position.set(2,4,1); scene.add(key);
 const fillR = new THREE.DirectionalLight(0xff4040,0.18); fillR.position.set(-3,2,-2); scene.add(fillR);
 const rim = new THREE.DirectionalLight(0xffffff,0.22); rim.position.set(0,5,-4); scene.add(rim);
 scene.add(new THREE.AmbientLight(0xffffff,0.33));
-
-// Ground + faint grid
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(2000,2000), new THREE.MeshStandardMaterial({color:0x0b0b10, roughness:.95}));
 ground.rotation.x = -Math.PI/2; ground.position.y=-0.02; scene.add(ground);
 const grid = new THREE.GridHelper(1200, 80, 0x26090E, 0x140508); grid.position.y=-0.019; grid.material.opacity=0.12; grid.material.transparent=true; scene.add(grid);
 
-// Postprocessing (ultra-minimal bloom)
+/* Post FX */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.85, 0.2);
 bloom.threshold = 0.35; bloom.strength = 0.15; bloom.radius = 0.2;
 composer.addPass(bloom);
 
+/* CSS2D labels overlay */
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(innerWidth, innerHeight);
+labelRenderer.domElement.style.position = 'fixed';
+labelRenderer.domElement.style.inset = '0';
+labelRenderer.domElement.style.pointerEvents = 'none';
+document.body.appendChild(labelRenderer.domElement);
+
 const ray = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let GLB, hovered, selected;
 
-/* ===== HELPERS ===== */
+/* id -> { node: CSS2DObject, center: Vector3 } */
+const LOT_LABELS = new Map();
+
+/* ========= HELPERS ========= */
+const pad3 = n => String(n).padStart(3,'0');
+const normId = n => `Lot_${pad3(n)}`;
+
+/* Extract lot number from ANY object name:
+   - handles collection paths "Layer/Lot_149.001"
+   - accepts variants "Lot-149a", "lot 149", "LOT_0149.003"
+   - ignores non-lot names like "grass", "road"
+*/
+function extractLotNumber(name){
+  if(!name) return null;
+  // take last path segment if there are folders/pipes
+  const base = name.split(/[\\/|]/).pop();
+  // strip common suffixes like ".001"
+  const clean = base.replace(/\.\d+$/,'');
+  // find "lot" followed by optional separators and digits (1-4 digits)
+  const m = clean.match(/lot[\s_\-]*0*(\d{1,4})/i);
+  return m ? m[1] : null;
+}
+
 function fit(root){
   const box = new THREE.Box3().setFromObject(root);
   const c = box.getCenter(new THREE.Vector3());
@@ -214,46 +241,68 @@ function fit(root){
   controls.target.copy(c); controls.minDistance=r*0.2; controls.maxDistance=r*10;
   camera.near=Math.max(0.1,r/100); camera.far=r*100; camera.updateProjectionMatrix(); controls.update();
 }
+
 function pick(x,y){
   mouse.set((x/canvas.clientWidth)*2-1, -(y/canvas.clientHeight)*2+1);
   ray.setFromCamera(mouse, camera);
   const hits = ray.intersectObjects(GLB?GLB.children:[], true);
-  return hits.find(h=>h.object?.name)?.object || null;
+  const hit = hits.find(h=> extractLotNumber(h.object?.name||'') !== null );
+  return hit ? hit.object : null;
 }
-function idDigits(name){ return (name||'').match(/\d+/)?.[0] || ''; }
-function idVariants(name){
-  const raw=(name||'').trim(); const digits=idDigits(raw); const v=[raw];
-  if(digits){ const p3=digits.padStart(3,'0'); v.push(`Lot_${p3}`, `lot_${p3}`, p3); }
-  return [...new Set(v)];
-}
+
 function normalize(){
   LOTS = {};
-  for(const [k,v] of Object.entries(RAW)){ for(const alt of idVariants(k)) LOTS[alt]=v; }
+  for(const [k,v] of Object.entries(RAW)){
+    const n = extractLotNumber(k);
+    if(!n) continue;
+    const id = normId(n);
+    LOTS[id]=v; LOTS[n]=v;
+  }
   buildIndex();
 }
+
 function buildIndex(){
   INDEX = []; const seen=new Set();
-  Object.keys(RAW).forEach(k=>{ if(!seen.has(k)){ INDEX.push({id:k}); seen.add(k);} });
-  if(GLB){ GLB.traverse(o=>{ if(o.isMesh && o.name && !seen.has(o.name)){ INDEX.push({id:o.name}); seen.add(o.name);} }); }
+
+  // from lots.json
+  Object.keys(RAW).forEach(k=>{
+    const n = extractLotNumber(k); if(!n) return;
+    const id = normId(n); if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
+  });
+
+  // from GLB
+  if(GLB){
+    GLB.traverse(o=>{
+      if(!o.isMesh || !o.name) return;
+      const n = extractLotNumber(o.name); if(!n) return;
+      const id = normId(n);
+      if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
+    });
+  }
+
   INDEX.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
 }
+
 function openDrawer(){ drawer.classList.add('open'); }
+
 function setHover(o){
   if(hovered===o) return;
   if(hovered?.material){ hovered.material.emissive?.set(0); hovered.material.emissiveIntensity=0; }
   hovered=o;
   if(hovered?.material){ hovered.material.emissive?.setHex(CONFIG.highlight); hovered.material.emissiveIntensity=.10; }
 }
+
 function setSelected(o){
   if(selected?.material){ selected.material.emissive?.set(0); selected.material.emissiveIntensity=0; }
   selected=o;
   if(selected?.material){ selected.material.emissive?.setHex(CONFIG.highlight); selected.material.emissiveIntensity=.22; }
   if(selected) showDetails(selected.name);
 }
+
 function showDetails(name){
-  const keys = idVariants(name);
-  const data = keys.map(k=>LOTS[k]).find(Boolean);
-  const display = keys.find(k=>/^Lot_\d{3}$/i.test(k)) || name;
+  const n = extractLotNumber(name);
+  const display = n ? normId(n) : name;
+  const data = LOTS[display] || LOTS[n || ''];
   openDrawer();
   lotIdEl.textContent = display.replace(/^lot_/i,'');
   if(!data){
@@ -266,46 +315,112 @@ function showDetails(name){
   areaEl.textContent  = data.area ? `${Number(data.area).toLocaleString()} ${data.unit||'m²'}` : '—';
   priceEl.textContent = data.price ? `$${Number(data.price).toLocaleString()}` : '—';
   const s=(data.status||'').toLowerCase();
-  const chip=document.createElement('span'); chip.className='chip '+(s.startsWith('ava')?'ok':s.startsWith('res')?'warn':s.startsWith('sold')?'bad':''); chip.textContent=s?s[0].toUpperCase()+s.slice(1):'—';
+  const chip=document.createElement('span'); chip.className='chip '+(s.startsWith('ava')?'avail':s.startsWith('res')?'resv':s.startsWith('sold')?'sold':''); chip.textContent=s?s[0].toUpperCase()+s.slice(1):'—';
   statusEl.innerHTML=''; statusEl.appendChild(chip);
   notesEl.textContent = data.notes || '—';
   if(data.thumb){ thumbEl.src=data.thumb; thumbEl.style.display='block'; } else { thumbEl.style.display='none'; }
   brochureBtn.onclick = ()=> data.brochure ? window.open(data.brochure,'_blank') : null;
   inquireBtn.onclick  = ()=> data.link ? window.open(data.link,'_blank') : window.open('mailto:sales@example.com?subject=Inquiry%20'+encodeURIComponent(display));
 }
-function focusLot(id){
-  const obj = GLB.getObjectByName(id) || GLB.getObjectByName(id.replace(/^Lot_/i,'')); if(!obj){ alert('Lot not found: '+id); return; }
+
+function focusLot(idOrName){
+  const n = extractLotNumber(idOrName);
+  const lotId = n ? normId(n) : null;
+  if(!lotId){ alert('Lot not found: '+idOrName); return; }
+
+  const info = LOT_LABELS.get(lotId);
+  if(info){
+    const c = info.center;
+    controls.target.copy(c);
+    camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(18)));
+    controls.update();
+    const obj = GLB.getObjectByName(lotId) || GLB.getObjectByName(lotId.replace(/^Lot_/,''));
+    if(obj) setSelected(obj);
+    return;
+  }
+
+  const obj = GLB.getObjectByName(lotId);
+  if(!obj){ alert('Lot not found: '+lotId); return; }
   const box=new THREE.Box3().setFromObject(obj), c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()).length();
   controls.target.copy(c);
   camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(Math.max(6, s*1.8))));
   controls.update();
   setSelected(obj);
 }
+
+/* Recolor lots from lots.json using your palette */
 function recolorByStatus(){
   if(!GLB) return;
   GLB.traverse(o=>{
-    if(!o.isMesh || !o.name) return;
-    const d=idVariants(o.name).map(k=>LOTS[k]).find(Boolean);
-    if(!d?.status) return;
-    const s=d.status.toLowerCase(), m=o.material.clone();
-    // Luxury monochrome with hint of wine tint
-    if(s.startsWith('ava')) m.color.setHex(0xb9b0b3);
-    else if(s.startsWith('res')) m.color.setHex(0x8a8084);
-    else if(s.startsWith('sold')) m.color.setHex(0x5a5154);
-    m.metalness = 0.08; m.roughness = 0.82;
-    o.material=m;
+    const n = extractLotNumber(o.name); if(!o.isMesh || !n) return;
+    const id = normId(n);
+    const d=LOTS[id] || LOTS[n];
+    const mat=(o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
+    if(d?.status){
+      const s = String(d.status).toLowerCase();
+      if(s.startsWith('sold'))      mat.color.set('#df1a25');     // red
+      else if(s.startsWith('res'))  mat.color.set('#9ad8ff');     // baby blue
+      else                          mat.color.set('#ffffff');     // available = white
+      mat.metalness = 0.06; mat.roughness = 0.6;
+    }
+    o.material = mat;
   });
 }
 
-/* ===== LOAD GLB ===== */
-// Resilient loader (retries without KTX2/Draco)
+/* ===== Always-on labels: 1 per lot number (unioned) ===== */
+function createPermanentLabels(){
+  if(!GLB) return;
+
+  LOT_LABELS.forEach(({node})=> node.parent?.remove(node));
+  LOT_LABELS.clear();
+
+  const unions = new Map(); // id -> Box3
+  GLB.traverse(o=>{
+    if(!o.isMesh || !o.name) return;
+    const n = extractLotNumber(o.name); if(!n) return;
+    const id = normId(n);
+    const box = new THREE.Box3().setFromObject(o);
+    const u = unions.get(id) || new THREE.Box3();
+    u.union(box);
+    unions.set(id, u);
+  });
+
+  unions.forEach((box, id)=>{
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+
+    const el = document.createElement('div');
+    el.className = 'lotLabel';
+    el.textContent = id.replace('Lot_',''); // 3-digit only
+    el.style.opacity = '1';
+
+    const css = new CSS2DObject(el);
+    css.position.set(center.x, center.y + Math.max(size.y*0.05, 1.0), center.z);
+    scene.add(css);
+
+    LOT_LABELS.set(id, { node: css, center });
+  });
+}
+
+/* Fade labels when very close */
+function updateLabelOpacity(){
+  const d = camera.position.distanceTo(controls.target);
+  const t0 = 15, t1 = 40;
+  const k = THREE.MathUtils.clamp((d - t0) / (t1 - t0), 0, 1);
+  const opacity = 0.2 + 0.8 * k;
+  LOT_LABELS.forEach(({node})=>{
+    if(node.element) node.element.style.opacity = String(opacity);
+  });
+}
+
+/* ========= LOAD GLB ========= */
 const resolvedGLB = new URL(CONFIG.glbUrl, location.href).href;
 const manager = new THREE.LoadingManager();
 manager.onStart = ()=>{ loading.textContent = 'Loading… 0%'; };
 manager.onError = (url)=>{ console.warn('Asset failed:', url); };
 
 let progressTimer = setTimeout(()=>{
-  loading.textContent = 'Still loading… If this stays, check that\n\n• "map.glb" is in the SAME folder as this HTML\n• The filename isn\'t changed\n• You\'re serving via http (OK) not file:// (not OK)\n• No ad-block/firewall is blocking unpkg loaders';
+  loading.textContent = 'Still loading… If this stays, check that\n\n• "map.glb" is next to this HTML\n• Using http(s) not file://\n• No ad-block/firewall is blocking unpkg loaders';
 }, 6000);
 
 function createLoader(withExtras=true){
@@ -342,36 +457,50 @@ function afterGLBLoaded(){
     if(o.material?.emissive) o.material.emissive.setHex(0x12070a);
   });
   scene.add(GLB);
-  fit(GLB); buildIndex(); recolorByStatus();
+  fit(GLB);
+  buildIndex();
+  recolorByStatus();
+  createPermanentLabels();
   startRender();
 }
 try { loadGLB(resolvedGLB); } catch(e){ console.error(e); loading.textContent='Failed to start loader. See console.'; }
 
-/* ===== INTERACTION ===== */
+/* ========= INTERACTION ========= */
 canvas.addEventListener('mousemove', e=>{
   const o = pick(e.clientX, e.clientY); setHover(o);
   if(o){
-    label.textContent = (idVariants(o.name).find(k=>/^Lot_\d{3}$/i.test(k))||o.name).replace(/^Lot_/i,'Lot ');
+    const n = extractLotNumber(o.name);
+    label.textContent = n ? `Lot ${pad3(n)}` : o.name;
     label.style.left = e.clientX+'px'; label.style.top = e.clientY+'px'; label.style.display='block';
   } else label.style.display='none';
 });
 canvas.addEventListener('mouseleave', ()=>{ setHover(null); label.style.display='none'; });
-canvas.addEventListener('click', e=>{ const o = pick(e.clientX,e.clientY); if(o) setSelected(o); });
-window.addEventListener('resize', ()=>{
-  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight);
+
+// Click zooms like search
+canvas.addEventListener('click', e=>{
+  const o = pick(e.clientX,e.clientY);
+  if(o) focusLot(o.name);
 });
-// Adaptive exposure on zoom
+
+window.addEventListener('resize', ()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+});
+
+// Exposure + label fade with zoom
 controls.addEventListener('change', ()=>{
   const d = camera.position.distanceTo(controls.target);
   renderer.toneMappingExposure = THREE.MathUtils.clamp(1.2 - d * 0.015, 0.65, 1.05);
+  updateLabelOpacity();
 });
 
-/* ===== SEARCH ===== */
+/* ========= SEARCH ========= */
 function searchLots(q){
   q=(q||'').trim().toLowerCase(); if(!q) return [];
   const num=q.replace(/[^0-9]/g,'');
   return INDEX.filter(it=>{
-    const id=it.id.toLowerCase(), label=it.id.replace(/^lot_/,'').toLowerCase();
+    const id=it.id.toLowerCase(), label=id.replace(/^lot_/,'');
     const notes=(RAW[it.id]?.notes||'').toLowerCase();
     return id.includes(q) || (num && label.includes(num)) || notes.includes(q);
   });
@@ -389,12 +518,11 @@ function showResults(items){
   }
   results.style.display='block';
 }
-// Debounce helper
 const debounce=(fn,ms=120)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
 const debouncedShow=debounce(()=> showResults(searchLots(search.value)), 120);
 search.addEventListener('input', debouncedShow);
 
-// Keyboard inside search (ArrowUp/Down/Enter/Escape)
+// Keyboard navigation in search
 let selIndex=-1;
 search.addEventListener('keydown', (e)=>{
   const items=[...results.querySelectorAll('.result')];
@@ -407,17 +535,14 @@ search.addEventListener('keydown', (e)=>{
     e.preventDefault(); if(!items.length) return; selIndex=(selIndex-1+items.length)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#151520':'' );
   } else if(e.key==='Enter'){
     e.preventDefault(); if(items.length && selIndex>=0){ items[selIndex].click(); selIndex=-1; return; }
-    const v=search.value.trim(); const num=v.replace(/[^0-9]/g,'').padStart(3,'0');
-    const guess = v.toLowerCase().startsWith('lot') ? v.replace(/\s+/g,'_') : `Lot_${num}`;
-    focusLot(guess); results.style.display='none';
+    const v=search.value.trim(); const m=v.match(/\d{1,4}/); const id = m?normId(m[0]):v.replace(/\s+/g,'_');
+    focusLot(id); results.style.display='none';
   }
 });
 document.addEventListener('click', (e)=>{
   if(!results.contains(e.target) && e.target!==search) { results.style.display='none'; selIndex=-1; }
 });
-// Global type-to-search focus & global Esc
 document.addEventListener('keydown', (e)=>{
-  // Global ESC clears if search is focused or results open
   if(e.key==='Escape'){
     if(document.activeElement===search || results.style.display==='block' || search.value){
       search.value=''; results.style.display='none'; selIndex=-1; search.blur();
@@ -434,8 +559,13 @@ document.addEventListener('keydown', (e)=>{
   }
 });
 
-/* ===== RENDER ===== */
-function render(){ requestAnimationFrame(render); controls.update(); composer.render(); }
+/* ========= RENDER ========= */
+function render(){
+  requestAnimationFrame(render);
+  controls.update();
+  composer.render();
+  labelRenderer.render(scene, camera);
+}
 </script>
 </body>
 </html>
