@@ -23,6 +23,9 @@
     --available:#ffffff;   /* white  */
     --reserved:#9ad8ff;    /* baby blue */
     --sold:#df1a25;        /* red */
+
+    /* Selected lot color */
+    --selected:#22c55e;    /* green */
   }
 
   html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
@@ -55,7 +58,7 @@
 
   /* Always-on lot labels */
   .lotLabel{
-    position:absolute;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(0,0,0,.55); /* slightly more transparent */
+    position:absolute;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(0,0,0,.55);
     color:#fff;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,.5);
     pointer-events:none;user-select:none;white-space:nowrap;backdrop-filter:blur(2px);transition:opacity .15s linear;
   }
@@ -303,11 +306,29 @@ function setHover(o){
   if(hovered?.material){ hovered.material.emissive?.setHex(CONFIG.highlight); hovered.material.emissiveIntensity=.10; }
 }
 
+/* ✅ Selected lot becomes green, previous selection reverts to its original color */
 function setSelected(o){
-  if(selected?.material){ selected.material.emissive?.set(0); selected.material.emissiveIntensity=0; }
-  selected=o;
-  if(selected?.material){ selected.material.emissive?.setHex(CONFIG.highlight); selected.material.emissiveIntensity=.22; }
-  if(selected) showDetails(selected.name);
+  if (selected?.material) {
+    if (selected.userData && selected.userData._origColor !== undefined) {
+      selected.material.color.setHex(selected.userData._origColor);
+    }
+    selected.material.emissive?.set(0);
+    selected.material.emissiveIntensity = 0;
+  }
+
+  selected = o;
+
+  if (selected?.material) {
+    selected.userData = selected.userData || {};
+    selected.userData._origColor = selected.material.color.getHex();
+
+    const selCSS = getComputedStyle(document.documentElement).getPropertyValue('--selected').trim() || '#22c55e';
+    selected.material.color.set(selCSS);
+    selected.material.emissive?.setHex(CONFIG.highlight);
+    selected.material.emissiveIntensity = .22;
+  }
+
+  if (selected) showDetails(selected.name);
 }
 
 function showDetails(name){
@@ -391,7 +412,8 @@ function createPermanentLabels(){
     const n = extractLotNumber(o.name); if(!n) return;
     const id = normId(n);
     const box = new THREE.Box3().setFromObject(o);
-    const u = unions.get(id) || new THREE.Box3();
+    const u = unions.get(id) || new THREE.B
+ox3();
     u.union(box);
     unions.set(id, u);
   });
