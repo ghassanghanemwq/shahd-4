@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Shahd 4  Map</title>
+<title>Shahd 4 Map</title>
 
 <script type="importmap">
 {
@@ -16,11 +16,11 @@
 
 <style>
   :root{
-    --bg:#0a0a0c; --text:#f3f3f7; --muted:#a8a8b8; --edge:#2a2a34;
+    --bg:#0a0a0c; --text:#0b0b10; --muted:#6c6c78; --edge:#e7e7ec;
     --primary:#8B0E2A; --primary-2:#A01832;
 
-    /* Legend colors */
-    --available:#ffffff;   /* white  */
+    /* Legend colors (available is now off-white) */
+    --available:#f3f3f0;   /* off-white */
     --reserved:#9ad8ff;    /* baby blue */
     --sold:#df1a25;        /* red */
 
@@ -28,79 +28,73 @@
     --selected:#22c55e;    /* green */
   }
 
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  #scene{position:fixed;inset:0;background:
-    radial-gradient(1400px 700px at 70% 35%, rgba(139,14,42,.12) 0%, rgba(139,14,42,0) 55%),
-    radial-gradient(900px 520px at 20% 80%, rgba(160,24,50,.10) 0%, rgba(160,24,50,0) 60%),
-    linear-gradient(180deg, #0a0a0c 0%, #0b0b10 50%, #0a0a0c 100%);
-  }
+  html,body{height:100%;margin:0;background:#ffffff;color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  #scene{position:fixed;inset:0;background:#ffffff}
   canvas{display:block;width:100%;height:100%}
-  #scene::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 2px,rgba(255,255,255,.02) 2px 3px)}
-  #scene::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(1200px 700px at 50% 50%,transparent 40%,rgba(0,0,0,.35) 100%)}
-  #loading{position:absolute;inset:0;display:grid;place-items:center;color:#d6d6e6;letter-spacing:.2em;text-transform:uppercase}
 
-  /* BRAND – left, white */
+  #loading{position:absolute;inset:0;display:grid;place-items:center;color:#777;letter-spacing:.2em;text-transform:uppercase}
+
+  /* BRAND – left */
   #brand{
     position:fixed; left:16px; top:16px; z-index:9;
     display:flex; align-items:center; gap:10px; pointer-events:auto;
   }
-  #brand img{
-    height:36px;/* force white */
-    opacity:1; display:block;
-  }
-  @media (max-width:900px){
-    #brand img{ height:28px; }
-  }
+  #brand img{ height:36px; opacity:1; display:block; }
+  @media (max-width:900px){ #brand img{ height:28px; } }
 
   /* Hover tooltip */
-  #label{position:fixed;pointer-events:none;transform:translate(-50%,-120%);padding:6px 10px;background:rgba(15,15,20,.7);
-    border:1px solid rgba(139,14,42,.35);border-radius:8px;color:#ffe6ea;font-weight:700;font-size:12px;box-shadow:0 8px 30px rgba(139,14,42,.25);display:none;z-index:6}
+  #label{
+    position:fixed;pointer-events:none;transform:translate(-50%,-120%);
+    padding:6px 10px;background:rgba(0,0,0,.75);
+    border:1px solid rgba(0,0,0,.1);border-radius:8px;color:#fff;font-weight:700;font-size:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,.15);display:none;z-index:6
+  }
 
   /* Always-on lot labels */
   .lotLabel{
-    position:absolute;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(0,0,0,.55);
-    color:#fff;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,.5);
+    position:absolute;padding:2px 6px;border:1px solid rgba(0,0,0,.12);border-radius:6px;background:rgba(255,255,255,.85);
+    color:#111;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:none;
     pointer-events:none;user-select:none;white-space:nowrap;backdrop-filter:blur(2px);transition:opacity .15s linear;
   }
 
   /* Legend */
   #legend{position:fixed;left:12px;bottom:12px;display:flex;gap:8px;z-index:5}
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#13131b;border:1px solid var(--edge);color:#d1d1dc}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--edge);color:#222}
   .chip::before{content:'';width:8px;height:8px;border-radius:50%}
   .chip.avail::before{background:var(--available)}
   .chip.resv::before{background:var(--reserved)}
   .chip.sold::before{background:var(--sold)}
 
   /* Search */
-  #searchWrap{position:fixed;top:16px;right:480px;z-index:7;width:min(420px,50vw)}
-  #search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #292937;background:#101018;color:var(--text);outline:none;
-    box-shadow:0 0 0 0 rgba(139,14,42,0),0 12px 24px rgba(0,0,0,.25);transition:box-shadow .2s ease,border-color .2s ease}
-  #search::placeholder{color:#8f8fa4}
-  #search:focus{border-color:rgba(139,14,42,.55);box-shadow:0 0 0 3px rgba(139,14,42,.15),0 20px 50px rgba(139,14,42,.15)}
-  #results{position:absolute;top:50px;left:0;right:0;background:#0f0f16;border:1px solid #262636;border-radius:12px;overflow:auto;max-height:42vh;box-shadow:0 22px 40px rgba(0,0,0,.45);display:none}
-  .result{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;color:#f1dbe0}
-  .result:hover{background:#151520;box-shadow:inset 0 0 0 1px rgba(139,14,42,.25)}
-  .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #3a3a4a;color:#f6c9cf;background:#1a1214;margin-left:auto}
+  #searchWrap{position:fixed;top:16px;right:16px;z-index:7;width:min(420px,50vw)}
+  #search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #e6e6ee;background:#fff;color:#111;outline:none;
+    box-shadow:0 0 0 0 rgba(139,14,42,0),0 12px 24px rgba(0,0,0,.05);transition:box-shadow .2s ease,border-color .2s ease}
+  #search::placeholder{color:#9aa}
+  #search:focus{border-color:#d7d7e2;box-shadow:0 0 0 3px rgba(160,24,50,.08),0 12px 30px rgba(0,0,0,.06)}
+  #results{position:absolute;top:50px;left:0;right:0;background:#fff;border:1px solid #e8e8f0;border-radius:12px;overflow:auto;max-height:42vh;box-shadow:0 22px 40px rgba(0,0,0,.08);display:none}
+  .result{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;color:#111}
+  .result:hover{background:#fafafa;box-shadow:inset 0 0 0 1px #eee}
+  .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #eee;color:#333;background:#f8f8ff;margin-left:auto}
 
   /* Drawer */
-  #drawer{position:fixed;top:0;right:0;bottom:0;width:380px;background:linear-gradient(180deg,rgba(20,14,18,.85) 0%,rgba(10,10,14,.92) 100%);
-    backdrop-filter:blur(10px);border-left:1px solid #1e1e28;box-shadow:-10px 0 28px rgba(0,0,0,.4);transform:translateX(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);z-index:6;overflow:auto}
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:380px;background:#fff;
+    border-left:1px solid #ececf3;box-shadow:-10px 0 28px rgba(0,0,0,.05);transform:translateX(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);z-index:6;overflow:auto}
   #drawer.open{transform:translateX(0)}
-  #drawer header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #222230;position:sticky;top:0;background:rgba(20,15,20,.8)}
-  #drawer header .title{font-weight:800;letter-spacing:.02em}
+  #drawer header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #f0f0f6;position:sticky;top:0;background:#fff}
+  #drawer header .title{font-weight:800;letter-spacing:.02em;color:#111}
   #content{padding:16px}
   .row{display:grid;grid-template-columns:110px 1fr;gap:10px;margin:10px 0}
-  .thumb{width:100%;border-radius:14px;border:1px solid #272734;background:#111118}
-  .muted{color:var(--muted)}
-  .ghost{width:100%;padding:12px 14px;border:1px solid #2a2a38;border-radius:12px;background:transparent;color:var(--text);font-weight:700;cursor:pointer}
-  .primary{width:100%;padding:12px 14px;border:0;border-radius:12px;background:linear-gradient(180deg,var(--primary),var(--primary-2));color:#1b0a0f;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(139,14,42,.25);text-transform:uppercase;letter-spacing:.03em}
+  .thumb{width:100%;border-radius:14px;border:1px solid #eee;background:#f9f9fb}
+  .muted{color:#666}
+  .ghost{width:100%;padding:12px 14px;border:1px solid #e9e9f2;border-radius:12px;background:#fff;color:#111;font-weight:700;cursor:pointer}
+  .primary{width:100%;padding:12px 14px;border:0;border-radius:12px;background:linear-gradient(180deg,var(--primary),var(--primary-2));color:#fff;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(139,14,42,.15);text-transform:uppercase;letter-spacing:.03em}
   .ghost,.primary{transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease,filter .25s ease}
   .ghost:hover{transform:translateY(-1px)}.ghost:active{transform:translateY(0)}
-  .primary:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(139,14,42,.26)}.primary:active{transform:translateY(0);filter:brightness(.98)}
+  .primary:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(139,14,42,.2)}.primary:active{transform:translateY(0);filter:brightness(.98)}
 </style>
 </head>
 <body>
-  <!-- Brand logo (white) -->
+  <!-- Brand logo -->
   <a id="brand" href="#" aria-label="Brand">
     <img src="svg-01.svg" alt="Brand logo" />
   </a>
@@ -185,36 +179,45 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;
+renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.03).texture;
-scene.fog = new THREE.FogExp2(0x0b0b10, 0.0009);
+/* No fog on white ground for crisp look */
+// scene.fog = new THREE.FogExp2(0xffffff, 0.0006);
 
 const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 4000);
 
 /* Orbit lock: never dip below */
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.maxPolarAngle = Math.PI * 0.49;  // prevents hovering below model
+controls.maxPolarAngle = Math.PI * 0.49;
 controls.minPolarAngle = 0.28;
 controls.enablePan = false;
 
-/* Lights & ground */
+/* Lights & WHITE ground */
 const key = new THREE.DirectionalLight(0xffffff,1.05); key.position.set(2,4,1); scene.add(key);
-const fillR = new THREE.DirectionalLight(0xff4040,0.18); fillR.position.set(-3,2,-2); scene.add(fillR);
+const fillR = new THREE.DirectionalLight(0xffffff,0.2); fillR.position.set(-3,2,-2); scene.add(fillR);
 const rim = new THREE.DirectionalLight(0xffffff,0.22); rim.position.set(0,5,-4); scene.add(rim);
-scene.add(new THREE.AmbientLight(0xffffff,0.33));
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(2000,2000), new THREE.MeshStandardMaterial({color:0x0b0b10, roughness:.95}));
-ground.rotation.x = -Math.PI/2; ground.position.y=-0.02; scene.add(ground);
-const grid = new THREE.GridHelper(1200, 80, 0x26090E, 0x140508); grid.position.y=-0.019; grid.material.opacity=0.12; grid.material.transparent=true; scene.add(grid);
+scene.add(new THREE.AmbientLight(0xffffff,0.45));
 
-/* Post FX */
+/* Pure white ground plane */
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(2000,2000),
+  new THREE.MeshStandardMaterial({color:0xffffff, roughness:.92, metalness:0})
+);
+ground.rotation.x = -Math.PI/2; ground.position.y=-0.02; scene.add(ground);
+
+/* Very light grid for scale */
+const grid = new THREE.GridHelper(1200, 80, 0xe8e8e8, 0xf2f2f2);
+grid.position.y=-0.019; grid.material.opacity=0.35; grid.material.transparent=true; scene.add(grid);
+
+/* Post FX (subtle) */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.85, 0.2);
-bloom.threshold = 0.35; bloom.strength = 0.15; bloom.radius = 0.2;
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.48, 0.85, 0.2);
+bloom.threshold = 0.85; bloom.strength = 0.08; bloom.radius = 0.15;
 composer.addPass(bloom);
 
 /* CSS2D labels overlay */
@@ -227,10 +230,12 @@ document.body.appendChild(labelRenderer.domElement);
 
 const ray = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-let GLB, hovered, selected;
+let GLB, hoveredLotId=null, selectedLotId=null;
 
 /* id -> { node: CSS2DObject, center: Vector3 } */
 const LOT_LABELS = new Map();
+/* id -> Mesh[] (all submeshes that belong to that lot) */
+const LOT_MESHES = new Map();
 
 /* ========= HELPERS ========= */
 const pad3 = n => String(n).padStart(3,'0');
@@ -243,6 +248,11 @@ function extractLotNumber(name){
   const clean = base.replace(/\.\d+$/,'');
   const m = clean.match(/lot[\s_\-]*0*(\d{1,4})/i);
   return m ? m[1] : null;
+}
+
+function getLotIdFromObjectName(name){
+  const n = extractLotNumber(name);
+  return n ? normId(n) : null;
 }
 
 function fit(root){
@@ -260,8 +270,11 @@ function pick(x,y){
   mouse.set((x/canvas.clientWidth)*2-1, -(y/canvas.clientHeight)*2+1);
   ray.setFromCamera(mouse, camera);
   const hits = ray.intersectObjects(GLB?GLB.children:[], true);
-  const hit = hits.find(h=> extractLotNumber(h.object?.name||'') !== null );
-  return hit ? hit.object : null;
+  for(const h of hits){
+    const id = getLotIdFromObjectName(h.object?.name||'');
+    if(id) return id;
+  }
+  return null;
 }
 
 function normalize(){
@@ -288,8 +301,7 @@ function buildIndex(){
   if(GLB){
     GLB.traverse(o=>{
       if(!o.isMesh || !o.name) return;
-      const n = extractLotNumber(o.name); if(!n) return;
-      const id = normId(n);
+      const id = getLotIdFromObjectName(o.name); if(!id) return;
       if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
     });
   }
@@ -299,56 +311,68 @@ function buildIndex(){
 
 function openDrawer(){ drawer.classList.add('open'); }
 
-/* Hover highlight */
-function setHover(o){
-  if(hovered===o) return;
-  if(hovered && hovered!==selected && hovered.material){
-    hovered.material.emissive?.set(0);
-    hovered.material.emissiveIntensity=0;
+/* --- Mesh coloring helpers (work on the whole lot) --- */
+function setMeshesColor(meshes, colorCSS){
+  meshes.forEach(m=>{
+    m.userData = m.userData || {};
+    if (m.userData._origColor === undefined) {
+      m.userData._origColor = m.material?.color?.getHex?.();
+    }
+    if (m.material?.color) m.material.color.set(colorCSS);
+  });
+}
+
+function restoreMeshesColor(meshes){
+  meshes.forEach(m=>{
+    if (m.userData && m.userData._origColor !== undefined && m.material?.color) {
+      m.material.color.setHex(m.userData._origColor);
+    }
+    if (m.material?.emissive) {
+      m.material.emissive.set(0);
+      m.material.emissiveIntensity = 0;
+    }
+  });
+}
+
+function setLotHover(lotId){
+  if(hoveredLotId === lotId) return;
+  if(hoveredLotId && hoveredLotId !== selectedLotId){
+    const prev = LOT_MESHES.get(hoveredLotId) || [];
+    prev.forEach(m=>{ m.material?.emissive?.set(0); m.material.emissiveIntensity=0; });
   }
-  hovered=o;
-  if(hovered && hovered!==selected && hovered.material){
-    hovered.material.emissive?.setHex(CONFIG.highlight);
-    hovered.material.emissiveIntensity=.10;
+  hoveredLotId = lotId;
+  if(hoveredLotId && hoveredLotId !== selectedLotId){
+    const ms = LOT_MESHES.get(hoveredLotId) || [];
+    ms.forEach(m=>{
+      m.material?.emissive?.setHex(CONFIG.highlight);
+      m.material.emissiveIntensity = .10;
+    });
   }
 }
 
-/* ✅ Selected = GREEN, and previous selection restores its original color */
-function setSelected(o){
-  // restore previous selection
-  if (selected?.material) {
-    if (selected.userData && selected.userData._origColor !== undefined) {
-      selected.material.color.setHex(selected.userData._origColor);
-    }
-    selected.material.emissive?.set(0);
-    selected.material.emissiveIntensity = 0;
+/* ✅ Selected = GREEN for the entire lot */
+function setLotSelected(lotId){
+  if(selectedLotId && selectedLotId!==lotId){
+    restoreMeshesColor(LOT_MESHES.get(selectedLotId) || []);
   }
+  selectedLotId = lotId;
 
-  selected = o;
-
-  if (selected?.material) {
-    // cache original color once
-    selected.userData = selected.userData || {};
-    if (selected.userData._origColor === undefined) {
-      selected.userData._origColor = selected.material.color.getHex();
-    }
-
-    // apply green for selected
-    const selCSS = getComputedStyle(document.documentElement)
+  const meshes = LOT_MESHES.get(lotId) || [];
+  const selCSS = getComputedStyle(document.documentElement)
       .getPropertyValue('--selected').trim() || '#22c55e';
-    selected.material.color.set(selCSS);
 
-    // emissive pop
-    selected.material.emissive?.setHex(CONFIG.highlight);
-    selected.material.emissiveIntensity = .22;
-  }
+  setMeshesColor(meshes, selCSS);
+  meshes.forEach(m=>{
+    m.material?.emissive?.setHex(CONFIG.highlight);
+    m.material.emissiveIntensity = .22;
+  });
 
-  if (selected) showDetails(selected.name);
+  if (lotId) showDetails(lotId);
 }
 
-function showDetails(name){
-  const n = extractLotNumber(name);
-  const display = n ? normId(n) : name;
+function showDetails(idOrName){
+  const n = extractLotNumber(idOrName) || extractLotNumber(String(idOrName));
+  const display = n ? normId(n) : idOrName;
   const data = LOTS[display] || LOTS[n || ''];
   openDrawer();
   lotIdEl.textContent = display.replace(/^lot_/i,'');
@@ -372,60 +396,68 @@ function showDetails(name){
 
 function focusLot(idOrName){
   const n = extractLotNumber(idOrName);
-  const lotId = n ? normId(n) : null;
-  if(!lotId){ alert('Lot not found: '+idOrName); return; }
-
+  const lotId = n ? normId(n) : (getLotIdFromObjectName(idOrName) || idOrName);
   const info = LOT_LABELS.get(lotId);
   if(info){
     const c = info.center;
     controls.target.copy(c);
     camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(18)));
     controls.update();
-    const obj = GLB.getObjectByName(lotId) || GLB.getObjectByName(lotId.replace(/^Lot_/,''));
-    if(obj) setSelected(obj);
+    setLotSelected(lotId);
     return;
   }
-
-  const obj = GLB.getObjectByName(lotId);
-  if(!obj){ alert('Lot not found: '+lotId); return; }
-  const box=new THREE.Box3().setFromObject(obj), c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()).length();
+  const ms = LOT_MESHES.get(lotId);
+  if(!ms || !ms.length){ alert('Lot not found: '+lotId); return; }
+  const box=new THREE.Box3(); ms.forEach(m=>box.union(new THREE.Box3().setFromObject(m)));
+  const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()).length();
   controls.target.copy(c);
   camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(Math.max(6, s*1.8))));
   controls.update();
-  setSelected(obj);
+  setLotSelected(lotId);
 }
 
-/* Recolor lots from lots.json */
+/* Recolor lots from lots.json (Available = off-white) */
 function recolorByStatus(){
-  if(!GLB) return;
-  GLB.traverse(o=>{
-    const n = extractLotNumber(o.name); if(!o.isMesh || !n) return;
-    const id = normId(n);
-    const d=LOTS[id] || LOTS[n];
-    const mat=(o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
-    if(d?.status){
-      const s = String(d.status).toLowerCase();
-      if(s.startsWith('sold'))      mat.color.set('#df1a25');     // red
-      else if(s.startsWith('res'))  mat.color.set('#9ad8ff');     // baby blue
-      else                          mat.color.set('#ffffff');     // available = white
-      mat.metalness = 0.06; mat.roughness = 0.6;
-    }
-    o.material = mat;
+  LOT_MESHES.forEach((meshes, id)=>{
+    const d = LOTS[id] || {};
+    meshes.forEach(o=>{
+      const mat=(o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
+      if(d?.status){
+        const s = String(d.status).toLowerCase();
+        if(s.startsWith('sold'))      mat.color.set('#df1a25');
+        else if(s.startsWith('res'))  mat.color.set('#9ad8ff');
+        else                          mat.color.set(getComputedStyle(document.documentElement).getPropertyValue('--available').trim() || '#f3f3f0');
+        mat.metalness = 0.06; mat.roughness = 0.6;
+      }else{
+        // default to off-white if no status
+        mat.color.set('#f3f3f0'); mat.metalness=0.06; mat.roughness=0.6;
+      }
+      o.material = mat;
+    });
   });
 }
 
-/* ===== Always-on labels: 1 per lot number (unioned) ===== */
-function createPermanentLabels(){
-  if(!GLB) return;
-
+/* Build LOT_MESHES and permanent labels */
+function buildLotMeshesAndLabels(){
   LOT_LABELS.forEach(({node})=> node.parent?.remove(node));
   LOT_LABELS.clear();
+  LOT_MESHES.clear();
 
   const unions = new Map(); // id -> Box3
   GLB.traverse(o=>{
     if(!o.isMesh || !o.name) return;
     const n = extractLotNumber(o.name); if(!n) return;
     const id = normId(n);
+
+    // Normalize mesh name to canonical lot id to avoid mismatches
+    o.name = id;
+
+    // Collect meshes per lot
+    const arr = LOT_MESHES.get(id) || [];
+    arr.push(o);
+    LOT_MESHES.set(id, arr);
+
+    // Union bbox per lot
     const box = new THREE.Box3().setFromObject(o);
     const u = unions.get(id) || new THREE.Box3();
     u.union(box);
@@ -444,12 +476,10 @@ function createPermanentLabels(){
     const css = new CSS2DObject(el);
     css.position.set(center.x, center.y + Math.max(size.y*0.05, 1.0), center.z);
     scene.add(css);
-
     LOT_LABELS.set(id, { node: css, center });
   });
 }
 
-/* Fade labels with zoom */
 function updateLabelOpacity(){
   const d = camera.position.distanceTo(controls.target);
   const t0 = 15, t1 = 40;
@@ -499,34 +529,35 @@ function afterGLBLoaded(){
   GLB.traverse(o=>{
     if(!o.isMesh) return;
     if(!o.material || !('color' in o.material)){
-      o.material = new THREE.MeshStandardMaterial({color:0xc2c6ce, metalness:.06, roughness:.84});
+      o.material = new THREE.MeshStandardMaterial({color:0xf3f3f0, metalness:.06, roughness:.84});
     }
-    if(o.material?.emissive) o.material.emissive.setHex(0x12070a);
+    if(o.material?.emissive) o.material.emissive.setHex(0x000000);
   });
   scene.add(GLB);
   fit(GLB);
   buildIndex();
+  buildLotMeshesAndLabels();
   recolorByStatus();
-  createPermanentLabels();
   startRender();
 }
 try { loadGLB(resolvedGLB); } catch(e){ console.error(e); loading.textContent='Failed to start loader. See console.'; }
 
 /* ========= INTERACTION ========= */
 canvas.addEventListener('mousemove', e=>{
-  const o = pick(e.clientX, e.clientY); setHover(o);
-  if(o){
-    const n = extractLotNumber(o.name);
-    label.textContent = n ? `Lot ${pad3(n)}` : o.name;
+  const lotId = pick(e.clientX, e.clientY);
+  setLotHover(lotId);
+  if(lotId){
+    const n = extractLotNumber(lotId);
+    label.textContent = n ? `Lot ${pad3(n)}` : lotId;
     label.style.left = e.clientX+'px'; label.style.top = e.clientY+'px'; label.style.display='block';
   } else label.style.display='none';
 });
-canvas.addEventListener('mouseleave', ()=>{ setHover(null); label.style.display='none'; });
+canvas.addEventListener('mouseleave', ()=>{ setLotHover(null); label.style.display='none'; });
 
 // Click zooms like search
 canvas.addEventListener('click', e=>{
-  const o = pick(e.clientX,e.clientY);
-  if(o) focusLot(o.name);
+  const lotId = pick(e.clientX,e.clientY);
+  if(lotId) focusLot(lotId);
 });
 
 window.addEventListener('resize', ()=>{
@@ -538,7 +569,7 @@ window.addEventListener('resize', ()=>{
 // Exposure + label fade with zoom
 controls.addEventListener('change', ()=>{
   const d = camera.position.distanceTo(controls.target);
-  renderer.toneMappingExposure = THREE.MathUtils.clamp(1.2 - d * 0.015, 0.65, 1.05);
+  renderer.toneMappingExposure = THREE.MathUtils.clamp(1.15 - d * 0.01, 0.9, 1.2);
   updateLabelOpacity();
 });
 
@@ -577,9 +608,9 @@ search.addEventListener('keydown', (e)=>{
     e.preventDefault(); search.value=''; results.style.display='none'; selIndex=-1; search.blur(); return;
   }
   if(e.key==='ArrowDown'){
-    e.preventDefault(); if(!items.length) return; selIndex=(selIndex+1)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#151520':'' );
+    e.preventDefault(); if(!items.length) return; selIndex=(selIndex+1)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#fafafa':'' );
   } else if(e.key==='ArrowUp'){
-    e.preventDefault(); if(!items.length) return; selIndex=(selIndex-1+items.length)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#151520':'' );
+    e.preventDefault(); if(!items.length) return; selIndex=(selIndex-1+items.length)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#fafafa':'' );
   } else if(e.key==='Enter'){
     e.preventDefault(); if(items.length && selIndex>=0){ items[selIndex].click(); selIndex=-1; return; }
     const v=search.value.trim(); const m=v.match(/\d{1,4}/); const id = m?normId(m[0]):v.replace(/\s+/g,'_');
