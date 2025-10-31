@@ -155,7 +155,11 @@ const CONFIG = { glbUrl:'./map.glb', highlight:0x8B0E2A };
 
 /* ========= DATA ========= */
 let RAW = {}, LOTS = {}, INDEX = [];
-fetch('lots.json').then(r=>r.json()).then(d=>{ RAW=d||{}; normalize(); }).catch(()=>{});
+// 👉 Hook to your final JSON with Arabic descriptions
+fetch('lots_final_with_excel_desc.json')
+  .then(r=>r.json())
+  .then(d=>{ RAW=d||{}; normalize(); })
+  .catch(()=>{});
 
 /* ========= DOM ========= */
 const canvas = document.getElementById('c');
@@ -277,13 +281,22 @@ function pick(x,y){
   return null;
 }
 
+/* ========= NORMALIZE (maps your schema to UI fields) ========= */
 function normalize(){
+  // Map Lot_* keys into LOTS, and convert schema fields (Lot, Area, Price, Status, Description)
   LOTS = {};
-  for(const [k,v] of Object.entries(RAW)){
-    const n = extractLotNumber(k);
-    if(!n) continue;
-    const id = normId(n);
-    LOTS[id]=v; LOTS[n]=v;
+  for (const [k, v] of Object.entries(RAW)) {
+    if (!/^Lot_\d{3}$/.test(k)) continue;
+    const mapped = {
+      area: (typeof v.Area === 'number') ? v.Area : null,
+      unit: 'm²',
+      price: (typeof v.Price === 'number') ? v.Price : null,
+      status: v.Status ? String(v.Status).toLowerCase() : null,
+      notes: v.Description || null,
+    };
+    LOTS[k] = mapped;
+    const m = k.match(/^Lot_(\d{1,4})$/);
+    if (m) LOTS[m[1]] = mapped; // numeric fallback
   }
   buildIndex();
 }
@@ -291,10 +304,10 @@ function normalize(){
 function buildIndex(){
   INDEX = []; const seen=new Set();
 
-  // from lots.json
+  // from RAW (Lot_* keys)
   Object.keys(RAW).forEach(k=>{
-    const n = extractLotNumber(k); if(!n) return;
-    const id = normId(n); if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
+    const m = k.match(/^Lot_(\d{1,4})$/); if(!m) return;
+    const id = normId(m[1]); if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
   });
 
   // from GLB
@@ -416,7 +429,7 @@ function focusLot(idOrName){
   setLotSelected(lotId);
 }
 
-/* Recolor lots from lots.json (Available = off-white) */
+/* Recolor lots from LOTS (Available = off-white) */
 function recolorByStatus(){
   LOT_MESHES.forEach((meshes, id)=>{
     const d = LOTS[id] || {};
@@ -429,7 +442,6 @@ function recolorByStatus(){
         else                          mat.color.set(getComputedStyle(document.documentElement).getPropertyValue('--available').trim() || '#f3f3f0');
         mat.metalness = 0.06; mat.roughness = 0.6;
       }else{
-        // default to off-white if no status
         mat.color.set('#f3f3f0'); mat.metalness=0.06; mat.roughness=0.6;
       }
       o.material = mat;
@@ -449,7 +461,7 @@ function buildLotMeshesAndLabels(){
     const n = extractLotNumber(o.name); if(!n) return;
     const id = normId(n);
 
-    // Normalize mesh name to canonical lot id to avoid mismatches
+    // Normalize mesh name to canonical lot id
     o.name = id;
 
     // Collect meshes per lot
@@ -579,7 +591,7 @@ function searchLots(q){
   const num=q.replace(/[^0-9]/g,'');
   return INDEX.filter(it=>{
     const id=it.id.toLowerCase(), label=id.replace(/^lot_/,'');
-    const notes=(RAW[it.id]?.notes||'').toLowerCase();
+    const notes=(LOTS[it.id]?.notes||'').toLowerCase(); // use mapped LOTS
     return id.includes(q) || (num && label.includes(num)) || notes.includes(q);
   });
 }
@@ -589,7 +601,7 @@ function showResults(items){
     const row=document.createElement('div'); row.className='result';
     row.innerHTML=`<strong>${it.id.replace(/^lot_/i,'Lot ')}</strong>`;
     const b=document.createElement('span'); b.className='badge';
-    b.textContent=(RAW[it.id]?.status||'').toString().toUpperCase()||'—';
+    b.textContent=(LOTS[it.id]?.status||'').toString().toUpperCase()||'—'; // mapped status
     row.appendChild(b);
     row.onclick=()=>{ focusLot(it.id); results.style.display='none'; };
     results.appendChild(row);
