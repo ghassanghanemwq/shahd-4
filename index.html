@@ -16,46 +16,34 @@
 
 <style>
   :root{
-    --bg:#0a0a0c; --text:#0b0b10; --muted:#6c6c78; --edge:#e7e7ec;
+    --text:#0b0b10; --muted:#6c6c78; --edge:#e7e7ec;
     --primary:#8B0E2A; --primary-2:#A01832;
-
-    /* Legend colors (available is now off-white) */
     --available:#f3f3f0;   /* off-white */
     --reserved:#9ad8ff;    /* baby blue */
     --sold:#df1a25;        /* red */
-
-    /* Selected lot */
     --selected:#22c55e;    /* green */
   }
 
-  html,body{height:100%;margin:0;background:#ffffff;color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  html,body{height:100%;margin:0;background:#ffffff;color:var(--text);
+    font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
   #scene{position:fixed;inset:0;background:#ffffff}
   canvas{display:block;width:100%;height:100%}
-
   #loading{position:absolute;inset:0;display:grid;place-items:center;color:#777;letter-spacing:.2em;text-transform:uppercase}
 
-  /* BRAND – left */
-  #brand{
-    position:fixed; left:16px; top:16px; z-index:9;
-    display:flex; align-items:center; gap:10px; pointer-events:auto;
-  }
-  #brand img{ height:36px; opacity:1; display:block; }
-  @media (max-width:900px){ #brand img{ height:28px; } }
+  /* Brand */
+  #brand{position:fixed;left:16px;top:16px;z-index:9;display:flex;align-items:center;gap:10px;pointer-events:auto}
+  #brand img{height:36px;display:block}
+  @media (max-width:900px){ #brand img{height:28px} }
 
   /* Hover tooltip */
-  #label{
-    position:fixed;pointer-events:none;transform:translate(-50%,-120%);
-    padding:6px 10px;background:rgba(0,0,0,.75);
+  #label{position:fixed;pointer-events:none;transform:translate(-50%,-120%);padding:6px 10px;background:rgba(0,0,0,.75);
     border:1px solid rgba(0,0,0,.1);border-radius:8px;color:#fff;font-weight:700;font-size:12px;
-    box-shadow:0 8px 30px rgba(0,0,0,.15);display:none;z-index:6
-  }
+    box-shadow:0 8px 30px rgba(0,0,0,.15);display:none;z-index:6}
 
-  /* Always-on lot labels */
-  .lotLabel{
-    position:absolute;padding:2px 6px;border:1px solid rgba(0,0,0,.12);border-radius:6px;background:rgba(255,255,255,.85);
-    color:#111;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:none;
-    pointer-events:none;user-select:none;white-space:nowrap;backdrop-filter:blur(2px);transition:opacity .15s linear;
-  }
+  /* Always-on canvas labels */
+  .lotLabel{position:absolute;padding:2px 6px;border:1px solid rgba(0,0,0,.12);border-radius:6px;background:rgba(255,255,255,.85);
+    color:#111;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:none;pointer-events:none;user-select:none;white-space:nowrap;
+    backdrop-filter:blur(2px);transition:opacity .15s linear}
 
   /* Legend */
   #legend{position:fixed;left:12px;bottom:12px;display:flex;gap:8px;z-index:5}
@@ -77,8 +65,8 @@
   .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #eee;color:#333;background:#f8f8ff;margin-left:auto}
 
   /* Drawer */
-  #drawer{position:fixed;top:0;right:0;bottom:0;width:380px;background:#fff;
-    border-left:1px solid #ececf3;box-shadow:-10px 0 28px rgba(0,0,0,.05);transform:translateX(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);z-index:6;overflow:auto}
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:380px;background:#fff;border-left:1px solid #ececf3;
+    box-shadow:-10px 0 28px rgba(0,0,0,.05);transform:translateX(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);z-index:6;overflow:auto}
   #drawer.open{transform:translateX(0)}
   #drawer header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #f0f0f6;position:sticky;top:0;background:#fff}
   #drawer header .title{font-weight:800;letter-spacing:.02em;color:#111}
@@ -88,16 +76,10 @@
   .muted{color:#666}
   .ghost{width:100%;padding:12px 14px;border:1px solid #e9e9f2;border-radius:12px;background:#fff;color:#111;font-weight:700;cursor:pointer}
   .primary{width:100%;padding:12px 14px;border:0;border-radius:12px;background:linear-gradient(180deg,var(--primary),var(--primary-2));color:#fff;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(139,14,42,.15);text-transform:uppercase;letter-spacing:.03em}
-  .ghost,.primary{transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease,filter .25s ease}
-  .ghost:hover{transform:translateY(-1px)}.ghost:active{transform:translateY(0)}
-  .primary:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(139,14,42,.2)}.primary:active{transform:translateY(0);filter:brightness(.98)}
 </style>
 </head>
 <body>
-  <!-- Brand logo -->
-  <a id="brand" href="#" aria-label="Brand">
-    <img src="svg-01.svg" alt="Brand logo" />
-  </a>
+  <a id="brand" href="#" aria-label="Brand"><img src="svg-01.svg" alt="Brand logo" /></a>
 
   <div id="scene">
     <div id="loading">LOADING… 0%</div>
@@ -110,13 +92,11 @@
     </div>
   </div>
 
-  <!-- Search -->
   <div id="searchWrap">
     <input id="search" placeholder="Search lot (e.g. 012 or Lot_012)" />
     <div id="results"></div>
   </div>
 
-  <!-- Drawer -->
   <aside id="drawer">
     <header>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11h18M5 19h14M7 5h10" stroke="#8B0E2A" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -155,7 +135,6 @@ const CONFIG = { glbUrl:'./map.glb', highlight:0x8B0E2A };
 
 /* ========= DATA ========= */
 let RAW = {}, LOTS = {}, INDEX = [];
-// 👉 Hook to your final JSON with Arabic descriptions
 fetch('lots_final_with_excel_desc.json')
   .then(r=>r.json())
   .then(d=>{ RAW=d||{}; normalize(); })
@@ -171,10 +150,7 @@ const areaEl  = document.getElementById('area');
 const priceEl = document.getElementById('price');
 const statusEl= document.getElementById('status');
 const notesEl = document.getElementById('notes');
-const thumbEl = document.getElementById('thumb');
-const brochureBtn = document.getElementById('brochureBtn');
-const inquireBtn  = document.getElementById('inquireBtn');
-const search = document.getElementById('search');
+const search  = document.getElementById('search');
 const results = document.getElementById('results');
 
 /* ========= THREE ========= */
@@ -188,12 +164,9 @@ renderer.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.03).texture;
-/* No fog on white ground for crisp look */
-// scene.fog = new THREE.FogExp2(0xffffff, 0.0006);
 
 const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 4000);
 
-/* Orbit lock: never dip below */
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.maxPolarAngle = Math.PI * 0.49;
@@ -202,29 +175,22 @@ controls.enablePan = false;
 
 /* Lights & WHITE ground */
 const key = new THREE.DirectionalLight(0xffffff,1.05); key.position.set(2,4,1); scene.add(key);
-const fillR = new THREE.DirectionalLight(0xffffff,0.2); fillR.position.set(-3,2,-2); scene.add(fillR);
-const rim = new THREE.DirectionalLight(0xffffff,0.22); rim.position.set(0,5,-4); scene.add(rim);
-scene.add(new THREE.AmbientLight(0xffffff,0.45));
+const fill = new THREE.AmbientLight(0xffffff,0.45); scene.add(fill);
 
-/* Pure white ground plane */
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(2000,2000),
   new THREE.MeshStandardMaterial({color:0xffffff, roughness:.92, metalness:0})
 );
 ground.rotation.x = -Math.PI/2; ground.position.y=-0.02; scene.add(ground);
 
-/* Very light grid for scale */
-const grid = new THREE.GridHelper(1200, 80, 0xe8e8e8, 0xf2f2f2);
-grid.position.y=-0.019; grid.material.opacity=0.35; grid.material.transparent=true; scene.add(grid);
-
-/* Post FX (subtle) */
+/* Subtle bloom */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.48, 0.85, 0.2);
 bloom.threshold = 0.85; bloom.strength = 0.08; bloom.radius = 0.15;
 composer.addPass(bloom);
 
-/* CSS2D labels overlay */
+/* CSS2D overlay for labels */
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(innerWidth, innerHeight);
 labelRenderer.domElement.style.position = 'fixed';
@@ -236,24 +202,21 @@ const ray = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let GLB, hoveredLotId=null, selectedLotId=null;
 
-/* id -> { node: CSS2DObject, center: Vector3 } */
-const LOT_LABELS = new Map();
-/* id -> Mesh[] (all submeshes that belong to that lot) */
-const LOT_MESHES = new Map();
+/* Per-lot containers */
+const LOT_LABELS = new Map();    // id -> { node: CSS2DObject, center: Vector3 }
+const LOT_MESHES = new Map();    // id -> Mesh[] (all submeshes)
 
 /* ========= HELPERS ========= */
 const pad3 = n => String(n).padStart(3,'0');
 const normId = n => `Lot_${pad3(n)}`;
 
-/* Extract lot number from ANY object name */
+/* Extract numeric lot from any name (Lot_001, lot-1, etc.) */
 function extractLotNumber(name){
   if(!name) return null;
-  const base = name.split(/[\\/|]/).pop();
-  const clean = base.replace(/\.\d+$/,'');
-  const m = clean.match(/lot[\s_\-]*0*(\d{1,4})/i);
+  const base = String(name).split(/[\\/|]/).pop().replace(/\.\d+$/,'');
+  const m = base.match(/lot[\s_\-]*0*(\d{1,4})/i);
   return m ? m[1] : null;
 }
-
 function getLotIdFromObjectName(name){
   const n = extractLotNumber(name);
   return n ? normId(n) : null;
@@ -281,36 +244,26 @@ function pick(x,y){
   return null;
 }
 
-/* ========= NORMALIZE (maps your schema to UI fields) ========= */
 function normalize(){
-  // Map Lot_* keys into LOTS, and convert schema fields (Lot, Area, Price, Status, Description)
   LOTS = {};
-  for (const [k, v] of Object.entries(RAW)) {
-    if (!/^Lot_\d{3}$/.test(k)) continue;
-    const mapped = {
-      area: (typeof v.Area === 'number') ? v.Area : null,
-      unit: 'm²',
-      price: (typeof v.Price === 'number') ? v.Price : null,
-      status: v.Status ? String(v.Status).toLowerCase() : null,
-      notes: v.Description || null,
-    };
-    LOTS[k] = mapped;
-    const m = k.match(/^Lot_(\d{1,4})$/);
-    if (m) LOTS[m[1]] = mapped; // numeric fallback
+  INDEX = [];
+  const seen = new Set();
+
+  // Expecting keys like "Lot_001" with fields Area, Price, Status, Description
+  for(const [k,v] of Object.entries(RAW)){
+    if(/^Lot_\d{3,4}$/.test(k)){
+      LOTS[k] = {
+        area: v.Area ?? null,
+        unit: 'm²',
+        price: v.Price ?? null,
+        status: v.Status ? String(v.Status).toLowerCase() : null,
+        notes: v.Description ?? null
+      };
+      if(!seen.has(k)){ INDEX.push({id:k}); seen.add(k); }
+    }
   }
-  buildIndex();
-}
 
-function buildIndex(){
-  INDEX = []; const seen=new Set();
-
-  // from RAW (Lot_* keys)
-  Object.keys(RAW).forEach(k=>{
-    const m = k.match(/^Lot_(\d{1,4})$/); if(!m) return;
-    const id = normId(m[1]); if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
-  });
-
-  // from GLB
+  // If GLB already loaded, add any lots present there too (for search)
   if(GLB){
     GLB.traverse(o=>{
       if(!o.isMesh || !o.name) return;
@@ -324,23 +277,22 @@ function buildIndex(){
 
 function openDrawer(){ drawer.classList.add('open'); }
 
-/* --- Mesh coloring helpers (work on the whole lot) --- */
-function setMeshesColor(meshes, colorCSS){
+/* Mesh color helpers for entire-lot selection */
+function setMeshesColor(meshes, cssColor){
   meshes.forEach(m=>{
     m.userData = m.userData || {};
-    if (m.userData._origColor === undefined) {
-      m.userData._origColor = m.material?.color?.getHex?.();
+    if (m.userData._origColor === undefined && m.material?.color) {
+      m.userData._origColor = m.material.color.getHex();
     }
-    if (m.material?.color) m.material.color.set(colorCSS);
+    if (m.material?.color) m.material.color.set(cssColor);
   });
 }
-
 function restoreMeshesColor(meshes){
   meshes.forEach(m=>{
     if (m.userData && m.userData._origColor !== undefined && m.material?.color) {
       m.material.color.setHex(m.userData._origColor);
     }
-    if (m.material?.emissive) {
+    if (m.material?.emissive){
       m.material.emissive.set(0);
       m.material.emissiveIntensity = 0;
     }
@@ -363,132 +315,103 @@ function setLotHover(lotId){
   }
 }
 
-/* ✅ Selected = GREEN for the entire lot */
+/* ✅ Selection: entire lot becomes green, regardless of submesh count */
 function setLotSelected(lotId){
-  if(selectedLotId && selectedLotId!==lotId){
+  if(selectedLotId && selectedLotId !== lotId){
     restoreMeshesColor(LOT_MESHES.get(selectedLotId) || []);
   }
   selectedLotId = lotId;
-
   const meshes = LOT_MESHES.get(lotId) || [];
-  const selCSS = getComputedStyle(document.documentElement)
-      .getPropertyValue('--selected').trim() || '#22c55e';
-
+  const selCSS = getComputedStyle(document.documentElement).getPropertyValue('--selected').trim() || '#22c55e';
   setMeshesColor(meshes, selCSS);
   meshes.forEach(m=>{
     m.material?.emissive?.setHex(CONFIG.highlight);
     m.material.emissiveIntensity = .22;
   });
-
   if (lotId) showDetails(lotId);
 }
 
 function showDetails(idOrName){
   const n = extractLotNumber(idOrName) || extractLotNumber(String(idOrName));
   const display = n ? normId(n) : idOrName;
-  const data = LOTS[display] || LOTS[n || ''];
+  const d = LOTS[display] || null;
+
   openDrawer();
   lotIdEl.textContent = display.replace(/^lot_/i,'');
-  if(!data){
-    areaEl.textContent=priceEl.textContent='—';
-    statusEl.innerHTML='<span class="chip">No data</span>';
-    notesEl.textContent=`Add to lots.json: "${display}"`;
-    thumbEl.style.display='none';
-    brochureBtn.onclick=inquireBtn.onclick=null; return;
-  }
-  areaEl.textContent  = data.area ? `${Number(data.area).toLocaleString()} ${data.unit||'m²'}` : '—';
-  priceEl.textContent = data.price ? `$${Number(data.price).toLocaleString()}` : '—';
-  const s=(data.status||'').toLowerCase();
-  const chip=document.createElement('span'); chip.className='chip '+(s.startsWith('ava')?'avail':s.startsWith('res')?'resv':s.startsWith('sold')?'sold':''); chip.textContent=s?s[0].toUpperCase()+s.slice(1):'—';
+  areaEl.textContent  = d?.area ? `${Number(d.area).toLocaleString()} ${d.unit||'m²'}` : '—';
+  /* JOD, no decimals */
+  priceEl.textContent = (typeof d?.price === 'number')
+    ? `JOD ${Number(d.price).toLocaleString('en-JO')}`
+    : '—';
+
+  const s = d?.status || '';
+  const chip=document.createElement('span');
+  chip.className='chip '+(s.startsWith('ava')?'avail':s.startsWith('res')?'resv':s.startsWith('sold')?'sold':'');
+  chip.textContent = s ? s[0].toUpperCase()+s.slice(1) : '—';
   statusEl.innerHTML=''; statusEl.appendChild(chip);
-  notesEl.textContent = data.notes || '—';
-  if(data.thumb){ thumbEl.src=data.thumb; thumbEl.style.display='block'; } else { thumbEl.style.display='none'; }
-  brochureBtn.onclick = ()=> data.brochure ? window.open(data.brochure,'_blank') : null;
-  inquireBtn.onclick  = ()=> data.link ? window.open(data.link,'_blank') : window.open('mailto:sales@example.com?subject=Inquiry%20'+encodeURIComponent(display));
+
+  notesEl.textContent = d?.notes || '—';
 }
 
-function focusLot(idOrName){
-  const n = extractLotNumber(idOrName);
-  const lotId = n ? normId(n) : (getLotIdFromObjectName(idOrName) || idOrName);
-  const info = LOT_LABELS.get(lotId);
-  if(info){
-    const c = info.center;
-    controls.target.copy(c);
-    camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(18)));
-    controls.update();
-    setLotSelected(lotId);
-    return;
-  }
-  const ms = LOT_MESHES.get(lotId);
-  if(!ms || !ms.length){ alert('Lot not found: '+lotId); return; }
-  const box=new THREE.Box3(); ms.forEach(m=>box.union(new THREE.Box3().setFromObject(m)));
-  const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()).length();
-  controls.target.copy(c);
-  camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(Math.max(6, s*1.8))));
-  controls.update();
-  setLotSelected(lotId);
-}
-
-/* Recolor lots from LOTS (Available = off-white) */
-function recolorByStatus(){
-  LOT_MESHES.forEach((meshes, id)=>{
-    const d = LOTS[id] || {};
-    meshes.forEach(o=>{
-      const mat=(o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
-      if(d?.status){
-        const s = String(d.status).toLowerCase();
-        if(s.startsWith('sold'))      mat.color.set('#df1a25');
-        else if(s.startsWith('res'))  mat.color.set('#9ad8ff');
-        else                          mat.color.set(getComputedStyle(document.documentElement).getPropertyValue('--available').trim() || '#f3f3f0');
-        mat.metalness = 0.06; mat.roughness = 0.6;
-      }else{
-        mat.color.set('#f3f3f0'); mat.metalness=0.06; mat.roughness=0.6;
-      }
-      o.material = mat;
-    });
-  });
-}
-
-/* Build LOT_MESHES and permanent labels */
+/* Build per-lot mesh groups and labels; recolor from status */
 function buildLotMeshesAndLabels(){
   LOT_LABELS.forEach(({node})=> node.parent?.remove(node));
   LOT_LABELS.clear();
   LOT_MESHES.clear();
 
   const unions = new Map(); // id -> Box3
+
   GLB.traverse(o=>{
     if(!o.isMesh || !o.name) return;
     const n = extractLotNumber(o.name); if(!n) return;
     const id = normId(n);
+    o.name = id; // normalize names to canonical ID
 
-    // Normalize mesh name to canonical lot id
-    o.name = id;
-
-    // Collect meshes per lot
     const arr = LOT_MESHES.get(id) || [];
     arr.push(o);
     LOT_MESHES.set(id, arr);
 
-    // Union bbox per lot
+    // Prepare default material if missing
+    if(!o.material || !('color' in o.material)){
+      o.material = new THREE.MeshStandardMaterial({color:0xf3f3f0, metalness:.06, roughness:.8});
+    }
+    // Build unioned bbox
     const box = new THREE.Box3().setFromObject(o);
     const u = unions.get(id) || new THREE.Box3();
     u.union(box);
     unions.set(id, u);
   });
 
+  // Create the always-on labels at union center
   unions.forEach((box, id)=>{
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
-
     const el = document.createElement('div');
     el.className = 'lotLabel';
     el.textContent = id.replace('Lot_','');
-    el.style.opacity = '1';
-
     const css = new CSS2DObject(el);
     css.position.set(center.x, center.y + Math.max(size.y*0.05, 1.0), center.z);
     scene.add(css);
     LOT_LABELS.set(id, { node: css, center });
+  });
+}
+
+function recolorByStatus(){
+  const offWhite = getComputedStyle(document.documentElement).getPropertyValue('--available').trim() || '#f3f3f0';
+  LOT_MESHES.forEach((meshes, id)=>{
+    const d = LOTS[id] || {};
+    const s = (d.status||'').toLowerCase();
+    let base = offWhite;
+    if(s.startsWith('sold')) base = '#df1a25';
+    else if(s.startsWith('res')) base = '#9ad8ff';
+    // else available or unknown => off-white
+
+    meshes.forEach(o=>{
+      const mat = (o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
+      mat.color.set(base);
+      mat.metalness = 0.06; mat.roughness = 0.6;
+      o.material = mat;
+    });
   });
 }
 
@@ -538,17 +461,10 @@ function onProgress(ev){
   loading.textContent = 'Loading… ' + pct + '%';
 }
 function afterGLBLoaded(){
-  GLB.traverse(o=>{
-    if(!o.isMesh) return;
-    if(!o.material || !('color' in o.material)){
-      o.material = new THREE.MeshStandardMaterial({color:0xf3f3f0, metalness:.06, roughness:.84});
-    }
-    if(o.material?.emissive) o.material.emissive.setHex(0x000000);
-  });
   scene.add(GLB);
   fit(GLB);
-  buildIndex();
   buildLotMeshesAndLabels();
+  normalize();         // refresh index with GLB names too
   recolorByStatus();
   startRender();
 }
@@ -566,7 +482,6 @@ canvas.addEventListener('mousemove', e=>{
 });
 canvas.addEventListener('mouseleave', ()=>{ setLotHover(null); label.style.display='none'; });
 
-// Click zooms like search
 canvas.addEventListener('click', e=>{
   const lotId = pick(e.clientX,e.clientY);
   if(lotId) focusLot(lotId);
@@ -578,7 +493,6 @@ window.addEventListener('resize', ()=>{
   labelRenderer.setSize(innerWidth, innerHeight);
 });
 
-// Exposure + label fade with zoom
 controls.addEventListener('change', ()=>{
   const d = camera.position.distanceTo(controls.target);
   renderer.toneMappingExposure = THREE.MathUtils.clamp(1.15 - d * 0.01, 0.9, 1.2);
@@ -591,7 +505,7 @@ function searchLots(q){
   const num=q.replace(/[^0-9]/g,'');
   return INDEX.filter(it=>{
     const id=it.id.toLowerCase(), label=id.replace(/^lot_/,'');
-    const notes=(LOTS[it.id]?.notes||'').toLowerCase(); // use mapped LOTS
+    const notes=(RAW[it.id]?.Description||'').toLowerCase();
     return id.includes(q) || (num && label.includes(num)) || notes.includes(q);
   });
 }
@@ -600,8 +514,9 @@ function showResults(items){
   for(const it of items.slice(0,12)){
     const row=document.createElement('div'); row.className='result';
     row.innerHTML=`<strong>${it.id.replace(/^lot_/i,'Lot ')}</strong>`;
+    const v = RAW[it.id]||{};
     const b=document.createElement('span'); b.className='badge';
-    b.textContent=(LOTS[it.id]?.status||'').toString().toUpperCase()||'—'; // mapped status
+    b.textContent=(v.Status||'').toString().toUpperCase()||'—';
     row.appendChild(b);
     row.onclick=()=>{ focusLot(it.id); results.style.display='none'; };
     results.appendChild(row);
@@ -612,7 +527,6 @@ const debounce=(fn,ms=120)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTime
 const debouncedShow=debounce(()=> showResults(searchLots(search.value)), 120);
 search.addEventListener('input', debouncedShow);
 
-// Keyboard navigation in search
 let selIndex=-1;
 search.addEventListener('keydown', (e)=>{
   const items=[...results.querySelectorAll('.result')];
@@ -632,22 +546,29 @@ search.addEventListener('keydown', (e)=>{
 document.addEventListener('click', (e)=>{
   if(!results.contains(e.target) && e.target!==search) { results.style.display='none'; selIndex=-1; }
 });
-document.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape'){
-    if(document.activeElement===search || results.style.display==='block' || search.value){
-      search.value=''; results.style.display='none'; selIndex=-1; search.blur();
-    }
+
+/* ========= FOCUS / CAMERA + SELECT ========= */
+function focusLot(idOrName){
+  const n = extractLotNumber(idOrName);
+  const lotId = n ? normId(n) : (getLotIdFromObjectName(idOrName) || idOrName);
+  const info = LOT_LABELS.get(lotId);
+  if(info){
+    const c = info.center;
+    controls.target.copy(c);
+    camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(18)));
+    controls.update();
+    setLotSelected(lotId);
     return;
   }
-  const tag=(e.target||{}).tagName;
-  if(tag==='INPUT' || tag==='TEXTAREA' || e.metaKey || e.ctrlKey || e.altKey) return;
-  const ch=e.key;
-  if(ch==='/' || /^[a-zA-Z0-9]$/.test(ch)){
-    search.focus();
-    if(ch!=='/' && !search.value) search.value=ch;
-    debouncedShow();
-  }
-});
+  const ms = LOT_MESHES.get(lotId);
+  if(!ms || !ms.length){ alert('Lot not found: '+lotId); return; }
+  const box=new THREE.Box3(); ms.forEach(m=>box.union(new THREE.Box3().setFromObject(m)));
+  const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()).length();
+  controls.target.copy(c);
+  camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(Math.max(6, s*1.8))));
+  controls.update();
+  setLotSelected(lotId);
+}
 
 /* ========= RENDER ========= */
 function render(){
