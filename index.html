@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Shahd 4 Map</title>
+<title>Shahd 4 — Ultra UI</title>
 
 <script type="importmap">
 {
@@ -16,110 +16,134 @@
 
 <style>
   :root{
-    --text:#0b0b10; --muted:#6c6c78; --edge:#e7e7ec;
+    --bg:#ffffff; --text:#0b0b10; --muted:#6c6c78; --edge:#e7e7ec;
     --primary:#8B0E2A; --primary-2:#A01832;
-
-    /* Status colors */
-    --available:#f3f3f0;   /* off-white for available */
-    --reserved:#9ad8ff;    /* baby blue */
-    --sold:#df1a25;        /* red */
-
-    /* Selected lot */
-    --selected:#22c55e;    /* green */
+    --available:#f3f3f0; --reserved:#9ad8ff; --sold:#df1a25; --selected:#22c55e;
   }
 
-  html,body{height:100%;margin:0;background:#ffffff;color:var(--text);
-    font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  #scene{position:fixed;inset:0;background:#ffffff}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
+    font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  #scene{position:fixed;inset:0;background:var(--bg)}
   canvas{display:block;width:100%;height:100%}
-  #loading{position:absolute;inset:0;display:grid;place-items:center;color:#777;letter-spacing:.2em;text-transform:uppercase;z-index:12}
 
-  /* Brand */
-  #brand{position:fixed;left:16px;top:16px;z-index:11;display:flex;align-items:center;gap:10px}
-  #brand img{height:36px;display:block}
-  @media (max-width:900px){ #brand img{height:28px} }
+  /* brand */
+  #brand{position:fixed;left:12px;top:12px;z-index:12;display:flex;align-items:center;gap:10px}
+  #brand img{height:34px;display:block}
+  @media (max-width:600px){ #brand img{height:26px} }
 
-  /* Hover tooltip */
-  #label{position:fixed;pointer-events:none;transform:translate(-50%,-120%);padding:6px 10px;background:rgba(0,0,0,.75);
-    border:1px solid rgba(0,0,0,.1);border-radius:8px;color:#fff;font-weight:700;font-size:12px;
-    box-shadow:0 8px 30px rgba(0,0,0,.15);display:none;z-index:6}
+  /* top-right menu (single source of truth) */
+  #menu{position:fixed;right:12px;top:12px;display:inline-flex;align-items:center;justify-content:center;
+    width:42px;height:42px;border-radius:12px;border:1px solid #ececf3;background:#fff;cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,.05);z-index:13}
+  #menu.hidden{display:none}
 
-  /* Always-on canvas labels */
-  .lotLabel{position:absolute;padding:2px 6px;border:1px solid rgba(0,0,0,.12);border-radius:6px;background:rgba(255,255,255,.85);
-    color:#111;font-weight:700;font-size:11px;letter-spacing:.02em;text-shadow:none;pointer-events:none;user-select:none;white-space:nowrap;
-    backdrop-filter:blur(2px);transition:opacity .15s linear}
+  /* search */
+  #topbar{position:fixed;inset:12px 72px auto 72px;display:flex;justify-content:center;z-index:12}
+  #search{width:min(560px,100%);padding:12px 14px;border-radius:12px;border:1px solid #e6e6ee;background:#fff;color:#111;outline:none;
+    box-shadow:0 0 0 0 rgba(139,14,42,0),0 12px 24px rgba(0,0,0,.05);transition:box-shadow .2s ease,border-color .2s ease}
+  #search::placeholder{color:#9aa}
+  #search:focus{border-color:#d7d7e2;box-shadow:0 0 0 3px rgba(160,24,50,.08),0 12px 30px rgba(0,0,0,.06)}
+  #results{position:absolute;top:54px;width:min(560px,calc(100% - 24px));background:#fff;border:1px solid #e8e8f0;border-radius:12px;overflow:auto;max-height:42vh;box-shadow:0 22px 40px rgba(0,0,0,.08);display:none}
+  .result{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;color:#111}
+  .result:hover{background:#fafafa}
+  .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #eee;color:#333;background:#f8f8ff;margin-left:auto}
 
-  /* Legend */
-  #legend{position:fixed;left:12px;bottom:12px;display:flex;gap:8px;z-index:5}
+  /* labels */
+  #label{position:fixed;pointer-events:none;transform:translate(-50%,-120%);padding:6px 10px;background:rgba(0,0,0,.78);
+    border:1px solid rgba(0,0,0,.1);border-radius:8px;color:#fff;font-weight:700;font-size:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);
+    display:none;z-index:8}
+  .lotLabel{position:absolute;padding:2px 6px;border:1px solid rgba(0,0,0,.1);border-radius:6px;background:rgba(255,255,255,.86);
+    color:#111;font-weight:700;font-size:11px;letter-spacing:.02em;pointer-events:none;user-select:none;white-space:nowrap;
+    backdrop-filter:blur(2px);transition:opacity .18s linear}
+
+  /* bottom bar (legend + centered HUD + lights) */
+  #bottomBar{position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;z-index:9}
+  #legend{display:flex;gap:8px;justify-self:start}
   .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--edge);color:#222}
   .chip::before{content:'';width:8px;height:8px;border-radius:50%}
   .chip.avail::before{background:var(--available)}
   .chip.resv::before{background:var(--reserved)}
   .chip.sold::before{background:var(--sold)}
+  #hud{position:static;justify-self:center}
+  #hud .help{padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--edge);font-size:12px;color:#222;box-shadow:0 6px 18px rgba(0,0,0,.06);opacity:.96}
+  #lights{justify-self:end;display:flex;gap:8px}
+  .iconBtn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;border:1px solid var(--edge);background:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+  .iconBtn[aria-pressed="true"]{outline:3px solid rgba(160,24,50,.12)}
 
-  /* Search (kept on top of everything so it never hides) */
-  #searchWrap{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:11;width:min(520px,60vw)}
-  #search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #e6e6ee;background:#fff;color:#111;outline:none;
-    box-shadow:0 0 0 0 rgba(139,14,42,0),0 12px 24px rgba(0,0,0,.05);transition:box-shadow .2s ease,border-color .2s ease}
-  #search::placeholder{color:#9aa}
-  #search:focus{border-color:#d7d7e2;box-shadow:0 0 0 3px rgba(160,24,50,.08),0 12px 30px rgba(0,0,0,.06)}
-  #results{position:absolute;top:50px;left:0;right:0;background:#fff;border:1px solid #e8e8f0;border-radius:12px;overflow:auto;max-height:42vh;box-shadow:0 22px 40px rgba(0,0,0,.08);display:none}
-  .result{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;color:#111}
-  .result:hover{background:#fafafa;box-shadow:inset 0 0 0 1px #eee}
-  .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #eee;color:#333;background:#f8f8ff;margin-left:auto}
-
-  /* Drawer (panel) */
-  #drawer{position:fixed;top:0;right:0;bottom:0;width:380px;background:#fff;border-left:1px solid #ececf3;
-    box-shadow:-10px 0 28px rgba(0,0,0,.05);transform:translateX(0);transition:transform .38s cubic-bezier(.2,.8,.2,1);z-index:10;overflow:auto}
-  #drawer.closed{transform:translateX(100%)}
+  /* drawer */
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:min(400px,88vw);background:#fff;border-left:1px solid #ececf3;
+    box-shadow:-10px 0 28px rgba(0,0,0,.06);transform:translateX(100%);transition:transform .42s cubic-bezier(.22,.8,.2,1);z-index:10;overflow:auto}
+  #drawer.open{transform:translateX(0)}
   #drawer header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid #f0f0f6;position:sticky;top:0;background:#fff}
   #drawer header .title{font-weight:800;letter-spacing:.02em;color:#111}
   #drawerToggle{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid #ececf3;background:#fff;cursor:pointer}
-  #drawerToggle:active{transform:translateY(1px)}
+  #drawerToggle svg{pointer-events:none} /* the SVG never steals the click */
   #content{padding:16px}
   .row{display:grid;grid-template-columns:110px 1fr;gap:10px;margin:10px 0}
   .muted{color:#666}
   .ghost{width:100%;padding:12px 14px;border:1px solid #e9e9f2;border-radius:12px;background:#fff;color:#111;font-weight:700;cursor:pointer}
   .primary{width:100%;padding:12px 14px;border:0;border-radius:12px;background:linear-gradient(180deg,var(--primary),var(--primary-2));color:#fff;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(139,14,42,.15);text-transform:uppercase;letter-spacing:.03em}
+
+  /* veil */
+  #veil{position:fixed;inset:0;background:rgba(0,0,0,.0);backdrop-filter:none;z-index:9;opacity:0;pointer-events:none;transition:opacity .28s ease, backdrop-filter .28s ease}
+  #veil.on{opacity:1;background:rgba(0,0,0,.18);backdrop-filter:blur(1.5px);pointer-events:auto}
+
+  /* loader */
+  #loading{position:absolute;inset:0;display:grid;place-items:center;color:#777;letter-spacing:.2em;text-transform:uppercase;z-index:11}
 </style>
 </head>
 <body>
-  <!-- Brand -->
+  <!-- brand -->
   <a id="brand" href="#" aria-label="Brand"><img src="svg-01.svg" alt="Brand logo" /></a>
+  <!-- single top-right burger -->
+  <button id="menu" aria-label="Open details">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="#8B0E2A" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
 
+  <!-- search -->
+  <div id="topbar">
+    <input id="search" placeholder="Search lot (e.g. 012 or Lot_012)" />
+    <div id="results"></div>
+  </div>
+
+  <!-- scene -->
   <div id="scene">
     <div id="loading">LOADING… 0%</div>
     <canvas id="c"></canvas>
     <div id="label"></div>
+  </div>
+
+  <!-- bottom bar -->
+  <div id="bottomBar">
     <div id="legend">
       <span class="chip avail">Available</span>
       <span class="chip resv">Reserved</span>
       <span class="chip sold">Sold</span>
     </div>
+    <div id="hud"><div class="help">LMB rotate • RMB pan • Wheel zoom</div></div>
+    <div id="lights">
+      <!-- Night toggle only -->
+      <button class="iconBtn" id="night" aria-pressed="false" title="Night mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 3a7.5 7.5 0 1 0 6 12A9 9 0 0 1 15 3z" stroke="#111" stroke-width="1.5"/></svg>
+      </button>
+    </div>
   </div>
 
-  <!-- Search (centered, always on top) -->
-  <div id="searchWrap">
-    <input id="search" placeholder="Search lot (e.g. 012 or Lot_012)" />
-    <div id="results"></div>
-  </div>
-
-  <!-- Drawer (no thumbnail section; burger INSIDE header) -->
+  <!-- veil + drawer -->
+  <div id="veil"></div>
   <aside id="drawer" aria-label="Parcel details">
     <header>
-      <div style="display:flex;align-items:center;gap:10px">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 11h18M5 19h14M7 5h10" stroke="#8B0E2A" stroke-width="0" stroke-linecap="round"/></svg>
-        <div class="title">Parcel Details</div>
-      </div>
-      <button id="drawerToggle" title="Close/Open panel" aria-label="Close or open panel">
-        <svg id="burgerIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" stroke="#8B0E2A" stroke-width="2" stroke-linecap="round"/>
+      <div class="title">Parcel Details</div>
+      <button id="drawerToggle" title="Close panel" aria-label="Close panel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6l-12 12" stroke="#8B0E2A" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
     </header>
     <div id="content">
-      <p class="muted">Click a lot or use search.</p>
-      <!-- (Thumbnail removed as requested) -->
+      <p class="muted">Tap a lot or use search.</p>
       <div class="row"><div class="muted">Lot</div><div id="lotId">—</div></div>
       <div class="row"><div class="muted">Area</div><div id="area">—</div></div>
       <div class="row"><div class="muted">Price</div><div id="price">—</div></div>
@@ -142,6 +166,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
@@ -150,17 +175,16 @@ const CONFIG = { glbUrl:'./map.glb', highlight:0x8B0E2A };
 
 /* ========= DATA ========= */
 let RAW = {}, LOTS = {}, INDEX = [];
-fetch('lots.json')
-  .then(r=>r.json())
-  .then(d=>{ RAW=d||{}; normalize(); })
-  .catch(()=>{});
+fetch('lots.json').then(r=>r.json()).then(d=>{ RAW=d||{}; normalize(); }).catch(()=>{});
 
 /* ========= DOM ========= */
 const canvas = document.getElementById('c');
 const loading = document.getElementById('loading');
 const label   = document.getElementById('label');
 const drawer  = document.getElementById('drawer');
+const veil    = document.getElementById('veil');
 const drawerToggle = document.getElementById('drawerToggle');
+const menuBtn = document.getElementById('menu');
 const lotIdEl = document.getElementById('lotId');
 const areaEl  = document.getElementById('area');
 const priceEl = document.getElementById('price');
@@ -170,51 +194,84 @@ const brochureBtn = document.getElementById('brochureBtn');
 const inquireBtn  = document.getElementById('inquireBtn');
 const search  = document.getElementById('search');
 const results = document.getElementById('results');
+const btnNight = document.getElementById('night');
 
-/* Drawer toggle in header */
-drawerToggle.addEventListener('click', ()=>{
-  drawer.classList.toggle('closed');
-});
+/* ========= DRAWER OPEN/CLOSE ========= */
+function toggleDrawer(force){
+  const toOpen = force !== undefined ? force : !drawer.classList.contains('open');
+  drawer.classList.toggle('open', toOpen);
+  veil.classList.toggle('on', toOpen);
+  menuBtn.classList.toggle('hidden', toOpen);
+}
+// explicit bindings (no ambiguity)
+if (menuBtn)      menuBtn.addEventListener('click', () => toggleDrawer(true));
+if (drawerToggle) drawerToggle.addEventListener('click', () => toggleDrawer(false));
+if (veil)         veil.addEventListener('click', () => toggleDrawer(false));
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ toggleDrawer(false); } });
+
+// swipe-right to close (when drawer is open)
+(() => {
+  let startX = 0, startY = 0, active = false;
+  drawer.addEventListener('touchstart', (e)=>{
+    if (!drawer.classList.contains('open')) return;
+    const t = e.changedTouches[0]; startX = t.clientX; startY = t.clientY; active = true;
+  }, {passive:true});
+  drawer.addEventListener('touchmove', (e)=>{
+    if(!active) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = Math.abs(t.clientY - startY);
+    if (dx > 60 && dy < 40){ active = false; toggleDrawer(false); }
+  }, {passive:true});
+  drawer.addEventListener('touchend', ()=> active=false, {passive:true});
+})();
 
 /* ========= THREE ========= */
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.03).texture;
+const roomEnv = pmrem.fromScene(new RoomEnvironment(renderer), 0.03).texture;
+scene.environment = roomEnv;
 
 const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 4000);
-
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.maxPolarAngle = Math.PI * 0.49;
 controls.minPolarAngle = 0.28;
-controls.enablePan = false;
+controls.enablePan = true;
+controls.dampingFactor = 0.06;
+// RMB pan, LMB rotate, wheel zoom
+controls.mouseButtons = {
+  LEFT: THREE.MOUSE.ROTATE,
+  MIDDLE: THREE.MOUSE.DOLLY,
+  RIGHT: THREE.MOUSE.PAN
+};
 
-/* Lights & WHITE ground */
-const key = new THREE.DirectionalLight(0xffffff,1.05); key.position.set(2,4,1); scene.add(key);
-const rim = new THREE.DirectionalLight(0xffffff,0.22); rim.position.set(0,5,-4); scene.add(rim);
+const key = new THREE.DirectionalLight(0xffffff,1.15); key.position.set(2,5,2); key.castShadow=true; scene.add(key);
+const rim = new THREE.DirectionalLight(0xffffff,0.24); rim.position.set(-2,6,-4); rim.castShadow=true; scene.add(rim);
 scene.add(new THREE.AmbientLight(0xffffff,0.45));
 
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(2000,2000),
-  new THREE.MeshStandardMaterial({color:0xffffff, roughness:.92, metalness:0})
+  new THREE.PlaneGeometry(4000,4000),
+  new THREE.MeshStandardMaterial({color:0xffffff, roughness:.9, metalness:0})
 );
-ground.rotation.x = -Math.PI/2; ground.position.y=-0.02; scene.add(ground);
+ground.rotation.x = -Math.PI/2; ground.position.y=-0.02; ground.receiveShadow = true; scene.add(ground);
 
-/* Bloom */
+// post fx
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.48, 0.85, 0.2);
-bloom.threshold = 0.85; bloom.strength = 0.08; bloom.radius = 0.15;
-composer.addPass(bloom);
+composer.addPass(new SMAAPass(innerWidth*renderer.getPixelRatio(), innerHeight*renderer.getPixelRatio()));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.35, 0.85, 0.2);
+bloom.threshold = 0.86; bloom.strength = 0.06; bloom.radius = 0.14; composer.addPass(bloom);
 
-/* CSS2D overlay for labels */
+// CSS2D labels
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(innerWidth, innerHeight);
 labelRenderer.domElement.style.position = 'fixed';
@@ -225,25 +282,14 @@ document.body.appendChild(labelRenderer.domElement);
 const ray = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let GLB, hoveredLotId=null, selectedLotId=null;
+const LOT_LABELS = new Map();
+const LOT_MESHES = new Map();
 
-/* Per-lot containers */
-const LOT_LABELS = new Map();    // id -> { node: CSS2DObject, center: Vector3 }
-const LOT_MESHES = new Map();    // id -> Mesh[] (all submeshes)
-
-/* ========= HELPERS ========= */
+/* helpers */
 const pad3 = n => String(n).padStart(3,'0');
 const normId = n => `Lot_${pad3(n)}`;
-
-function extractLotNumber(name){
-  if(!name) return null;
-  const base = String(name).split(/[\\/|]/).pop().replace(/\.\d+$/,'');
-  const m = base.match(/lot[\s_\-]*0*(\d{1,4})/i);
-  return m ? m[1] : null;
-}
-function getLotIdFromObjectName(name){
-  const n = extractLotNumber(name);
-  return n ? normId(n) : null;
-}
+function extractLotNumber(name){ if(!name) return null; const base = String(name).split(/[\\/|]/).pop().replace(/\.+\d+$/,''); const m = base.match(/lot[\s_\-]*0*(\d{1,4})/i); return m ? m[1] : null; }
+function getLotIdFromObjectName(name){ const n = extractLotNumber(name); return n ? normId(n) : null; }
 
 function fit(root){
   const box = new THREE.Box3().setFromObject(root);
@@ -252,7 +298,8 @@ function fit(root){
   const r = Math.max(s.x,s.y,s.z)*0.6;
   const dir = new THREE.Vector3(1,0.8,1).normalize();
   camera.position.copy(c.clone().add(dir.multiplyScalar(r*2.3)));
-  controls.target.copy(c); controls.minDistance=r*0.2; controls.maxDistance=r*10;
+  controls.target.copy(c);
+  controls.minDistance=r*0.2; controls.maxDistance=r*10;
   camera.near=Math.max(0.1,r/100); camera.far=r*100; camera.updateProjectionMatrix(); controls.update();
 }
 
@@ -268,38 +315,22 @@ function pick(x,y){
 }
 
 function normalize(){
-  LOTS = {};
-  INDEX = [];
-  const seen = new Set();
-
-  // Expecting keys like "Lot_001" with {Area, Price, Status, Description}
+  LOTS = {}; INDEX = []; const seen = new Set();
   for(const [k,v] of Object.entries(RAW)){
     if(/^Lot_\d{3,4}$/.test(k)){
-      LOTS[k] = {
-        area: v.Area ?? null,
-        unit: 'm²',
-        price: v.Price ?? null,
-        status: v.Status ? String(v.Status).toLowerCase() : null,
-        notes: v.Description ?? null
-      };
+      LOTS[k] = { area: v.Area ?? null, unit: 'm²', price: v.Price ?? null, status: v.Status ? String(v.Status).toLowerCase() : null, notes: v.Description ?? null, brochure:v.brochure, link:v.link };
       if(!seen.has(k)){ INDEX.push({id:k}); seen.add(k); }
     }
   }
-
   if(GLB){
-    GLB.traverse(o=>{
-      if(!o.isMesh || !o.name) return;
-      const id = getLotIdFromObjectName(o.name); if(!id) return;
-      if(!seen.has(id)){ INDEX.push({id}); seen.add(id); }
-    });
+    GLB.traverse(o=>{ if(!o.isMesh || !o.name) return; const id = getLotIdFromObjectName(o.name); if(!id) return; if(!seen.has(id)){ INDEX.push({id}); seen.add(id); } });
   }
-
   INDEX.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
 }
 
-function openDrawer(){ drawer.classList.remove('closed'); }
+function openDrawer(){ toggleDrawer(true); }
+function closeDrawer(){ toggleDrawer(false); }
 
-/* Mesh color helpers */
 function setMeshesColor(meshes, cssColor){
   meshes.forEach(m=>{
     m.userData = m.userData || {};
@@ -314,10 +345,7 @@ function restoreMeshesColor(meshes){
     if (m.userData && m.userData._origColor !== undefined && m.material?.color) {
       m.material.color.setHex(m.userData._origColor);
     }
-    if (m.material?.emissive){
-      m.material.emissive.set(0);
-      m.material.emissiveIntensity = 0;
-    }
+    if (m.material?.emissive){ m.material.emissive.set(0); m.material.emissiveIntensity = 0; }
   });
 }
 
@@ -330,26 +358,17 @@ function setLotHover(lotId){
   hoveredLotId = lotId;
   if(hoveredLotId && hoveredLotId !== selectedLotId){
     const ms = LOT_MESHES.get(hoveredLotId) || [];
-    ms.forEach(m=>{
-      m.material?.emissive?.setHex(CONFIG.highlight);
-      m.material.emissiveIntensity = .10;
-    });
+    ms.forEach(m=>{ m.material?.emissive?.setHex(CONFIG.highlight); m.material.emissiveIntensity = .10; });
   }
 }
 
-/* Selection: entire lot turns green; also opens drawer */
 function setLotSelected(lotId){
-  if(selectedLotId && selectedLotId !== lotId){
-    restoreMeshesColor(LOT_MESHES.get(selectedLotId) || []);
-  }
+  if(selectedLotId && selectedLotId !== lotId){ restoreMeshesColor(LOT_MESHES.get(selectedLotId) || []); }
   selectedLotId = lotId;
   const meshes = LOT_MESHES.get(lotId) || [];
   const selCSS = getComputedStyle(document.documentElement).getPropertyValue('--selected').trim() || '#22c55e';
   setMeshesColor(meshes, selCSS);
-  meshes.forEach(m=>{
-    m.material?.emissive?.setHex(CONFIG.highlight);
-    m.material.emissiveIntensity = .22;
-  });
+  meshes.forEach(m=>{ m.material?.emissive?.setHex(CONFIG.highlight); m.material.emissiveIntensity = .22; m.castShadow = true; });
   if (lotId){ openDrawer(); showDetails(lotId); }
 }
 
@@ -360,17 +379,13 @@ function showDetails(idOrName){
 
   lotIdEl.textContent = display.replace(/^lot_/i,'');
   areaEl.textContent  = d?.area ? `${Number(d.area).toLocaleString()} ${d.unit||'m²'}` : '—';
-  /* JOD, no decimals */
-  priceEl.textContent = (typeof d?.price === 'number')
-    ? `JOD ${Math.round(Number(d.price)).toLocaleString('en-JO')}`
-    : '—';
+  priceEl.textContent = (typeof d?.price === 'number') ? `JOD ${Math.round(Number(d.price)).toLocaleString('en-JO')}` : '—';
 
   const s = d?.status || '';
   const chip=document.createElement('span');
   chip.className='chip '+(s.startsWith('ava')?'avail':s.startsWith('res')?'resv':s.startsWith('sold')?'sold':'');
   chip.textContent = s ? s[0].toUpperCase()+s.slice(1) : '—';
   statusEl.innerHTML=''; statusEl.appendChild(chip);
-
   notesEl.textContent = d?.notes || '—';
 
   brochureBtn.onclick = ()=> d?.brochure ? window.open(d.brochure,'_blank') : null;
@@ -381,27 +396,19 @@ function buildLotMeshesAndLabels(){
   LOT_LABELS.forEach(({node})=> node.parent?.remove(node));
   LOT_LABELS.clear();
   LOT_MESHES.clear();
-
-  const unions = new Map(); // id -> Box3
-
+  const unions = new Map();
   GLB.traverse(o=>{
     if(!o.isMesh || !o.name) return;
     const n = extractLotNumber(o.name); if(!n) return;
     const id = normId(n);
-    o.name = id; // normalize
-
-    const arr = LOT_MESHES.get(id) || [];
-    arr.push(o);
-    LOT_MESHES.set(id, arr);
-
+    o.name = id;
+    const arr = LOT_MESHES.get(id) || []; arr.push(o); LOT_MESHES.set(id, arr);
     if(!o.material || !('color' in o.material)){
-      o.material = new THREE.MeshStandardMaterial({color:0xf3f3f0, metalness:.06, roughness:.8});
+      o.material = new THREE.MeshStandardMaterial({color:0xf3f3f0, metalness:.06, roughness:.6});
     }
-
+    o.castShadow = true; o.receiveShadow = true;
     const box = new THREE.Box3().setFromObject(o);
-    const u = unions.get(id) || new THREE.Box3();
-    u.union(box);
-    unions.set(id, u);
+    const u = unions.get(id) || new THREE.Box3(); u.union(box); unions.set(id, u);
   });
 
   unions.forEach((box, id)=>{
@@ -425,11 +432,9 @@ function recolorByStatus(){
     let base = offWhite;
     if(s.startsWith('sold')) base = '#df1a25';
     else if(s.startsWith('res')) base = '#9ad8ff';
-
     meshes.forEach(o=>{
       const mat = (o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
-      mat.color.set(base);
-      mat.metalness = 0.06; mat.roughness = 0.6;
+      mat.color.set(base); mat.metalness = 0.1; mat.roughness = 0.5;
       o.material = mat;
     });
   });
@@ -440,9 +445,7 @@ function updateLabelOpacity(){
   const t0 = 15, t1 = 40;
   const k = THREE.MathUtils.clamp((d - t0) / (t1 - t0), 0, 1);
   const opacity = 0.2 + 0.8 * k;
-  LOT_LABELS.forEach(({node})=>{
-    if(node.element) node.element.style.opacity = String(opacity);
-  });
+  LOT_LABELS.forEach(({node})=>{ if(node.element) node.element.style.opacity = String(opacity); });
 }
 
 /* ========= LOAD GLB ========= */
@@ -450,10 +453,7 @@ const resolvedGLB = new URL(CONFIG.glbUrl, location.href).href;
 const manager = new THREE.LoadingManager();
 manager.onStart = ()=>{ loading.textContent = 'Loading… 0%'; };
 manager.onError = (url)=>{ console.warn('Asset failed:', url); };
-
-let progressTimer = setTimeout(()=>{
-  loading.textContent = 'Still loading… If this stays, check that\n\n• "map.glb" is next to this HTML\n• Using http(s) not file://\n• No ad-block/firewall is blocking unpkg loaders';
-}, 6000);
+let progressTimer = setTimeout(()=>{ loading.textContent = 'Still loading… Check that\n\n• "map.glb" is next to this HTML\n• Using http(s) not file://\n• No ad-block/firewall is blocking loaders'; }, 6000);
 
 function createLoader(withExtras=true){
   const L = new GLTFLoader(manager);
@@ -482,9 +482,10 @@ function onProgress(ev){
 }
 function afterGLBLoaded(){
   scene.add(GLB);
+  GLB.traverse(o=>{ if(o.isMesh){ o.castShadow = true; o.receiveShadow = true; if(o.material?.map){ o.material.map.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy()); } } });
   fit(GLB);
   buildLotMeshesAndLabels();
-  normalize();         // refresh index with GLB names too
+  normalize();
   recolorByStatus();
   startRender();
 }
@@ -501,11 +502,11 @@ canvas.addEventListener('mousemove', e=>{
   } else label.style.display='none';
 });
 canvas.addEventListener('mouseleave', ()=>{ setLotHover(null); label.style.display='none'; });
+canvas.addEventListener('click', e=>{ const lotId = pick(e.clientX,e.clientY); if(lotId) focusLot(lotId); else deselect(); });
 
-canvas.addEventListener('click', e=>{
-  const lotId = pick(e.clientX,e.clientY);
-  if(lotId) focusLot(lotId);
-});
+canvas.addEventListener('touchend', e=>{
+  if(!pick(e.changedTouches[0].clientX, e.changedTouches[0].clientY)) { deselect(); }
+}, {passive:true});
 
 window.addEventListener('resize', ()=>{
   camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
@@ -515,7 +516,7 @@ window.addEventListener('resize', ()=>{
 
 controls.addEventListener('change', ()=>{
   const d = camera.position.distanceTo(controls.target);
-  renderer.toneMappingExposure = THREE.MathUtils.clamp(1.15 - d * 0.01, 0.9, 1.2);
+  renderer.toneMappingExposure = THREE.MathUtils.clamp(1.12 - d * 0.01, 0.9, 1.25);
   updateLabelOpacity();
 });
 
@@ -535,39 +536,27 @@ function showResults(items){
     const row=document.createElement('div'); row.className='result';
     row.innerHTML=`<strong>${it.id.replace(/^lot_/i,'Lot ')}</strong>`;
     const v = RAW[it.id]||{};
-    const b=document.createElement('span'); b.className='badge';
-    b.textContent=(v.Status||'').toString().toUpperCase()||'—';
-    row.appendChild(b);
-    row.onclick=()=>{ focusLot(it.id); results.style.display='none'; };
+    const b=document.createElement('span'); b.className='badge'; b.textContent=(v.Status||'').toString().toUpperCase()||'—';
+    row.appendChild(b); row.onclick=()=>{ focusLot(it.id); results.style.display='none'; };
     results.appendChild(row);
   }
   results.style.display='block';
 }
 const debounce=(fn,ms=120)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
-const debouncedShow=debounce(()=> showResults(searchLots(search.value)), 120);
+const debouncedShow=debounce(()=> showResults(searchLots(search.value)), 140);
 search.addEventListener('input', debouncedShow);
-
 let selIndex=-1;
 search.addEventListener('keydown', (e)=>{
   const items=[...results.querySelectorAll('.result')];
-  if(e.key==='Escape'){
-    e.preventDefault(); search.value=''; results.style.display='none'; selIndex=-1; search.blur(); return;
-  }
-  if(e.key==='ArrowDown'){
-    e.preventDefault(); if(!items.length) return; selIndex=(selIndex+1)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#fafafa':'' );
-  } else if(e.key==='ArrowUp'){
-    e.preventDefault(); if(!items.length) return; selIndex=(selIndex-1+items.length)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#fafafa':'' );
-  } else if(e.key==='Enter'){
-    e.preventDefault(); if(items.length && selIndex>=0){ items[selIndex].click(); selIndex=-1; return; }
-    const v=search.value.trim(); const m=v.match(/\d{1,4}/); const id = m?normId(m[0]):v.replace(/\s+/g,'_');
-    focusLot(id); results.style.display='none';
-  }
-});
-document.addEventListener('click', (e)=>{
-  if(!results.contains(e.target) && e.target!==search) { results.style.display='none'; selIndex=-1; }
+  if(e.key==='Escape'){ e.preventDefault(); search.value=''; results.style.display='none'; selIndex=-1; search.blur(); return; }
+  if(e.key==='ArrowDown'){ e.preventDefault(); if(!items.length) return; selIndex=(selIndex+1)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#fafafa':'' ); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); if(!items.length) return; selIndex=(selIndex-1+items.length)%items.length; items.forEach((el,i)=>el.style.background=i===selIndex?'#fafafa':'' ); }
+  else if(e.key==='Enter'){ e.preventDefault(); if(items.length && selIndex>=0){ items[selIndex].click(); selIndex=-1; return; } const v=search.value.trim(); const m=v.match(/\d{1,4}/); const id = m?normId(m[0]):v.replace(/\s+/g,'_'); focusLot(id); results.style.display='none'; }
 });
 
-/* ========= CAMERA FOCUS ========= */
+document.addEventListener('click', (e)=>{ if(!results.contains(e.target) && e.target!==search) { results.style.display='none'; selIndex=-1; } });
+
+/* ========= FOCUS / DESELECT ========= */
 function focusLot(idOrName){
   const n = extractLotNumber(idOrName);
   const lotId = n ? normId(n) : (getLotIdFromObjectName(idOrName) || idOrName);
@@ -576,9 +565,7 @@ function focusLot(idOrName){
     const c = info.center;
     controls.target.copy(c);
     camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(18)));
-    controls.update();
-    setLotSelected(lotId);
-    return;
+    controls.update(); setLotSelected(lotId); return;
   }
   const ms = LOT_MESHES.get(lotId);
   if(!ms || !ms.length){ alert('Lot not found: '+lotId); return; }
@@ -586,17 +573,31 @@ function focusLot(idOrName){
   const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()).length();
   controls.target.copy(c);
   camera.position.copy(c.clone().add(new THREE.Vector3(1,0.85,1).normalize().multiplyScalar(Math.max(6, s*1.8))));
-  controls.update();
-  setLotSelected(lotId);
+  controls.update(); setLotSelected(lotId);
 }
- 
+
+function deselect(){
+  if(selectedLotId){ restoreMeshesColor(LOT_MESHES.get(selectedLotId) || []); selectedLotId=null; }
+  closeDrawer();
+}
+
+/* ========= NIGHT MODE ========= */
+const GROUND_DAY = 0xffffff;
+const GROUND_NIGHT = 0x000000;
+let isNight = false;
+function applyNight(on){
+  isNight = on;
+  btnNight.setAttribute('aria-pressed', String(on));
+  key.intensity = on ? 0.4 : 1.15;
+  rim.intensity = on ? 0.55 : 0.24;
+  renderer.toneMappingExposure = on ? 0.9 : 1.05;
+  bloom.strength = on ? 0.10 : 0.06;
+  ground.material.color.set(on ? GROUND_NIGHT : GROUND_DAY);
+}
+btnNight.addEventListener('click', ()=> applyNight(!isNight));
+
 /* ========= RENDER ========= */
-function render(){
-  requestAnimationFrame(render);
-  controls.update();
-  composer.render();
-  labelRenderer.render(scene, camera);
-}
+function render(){ requestAnimationFrame(render); controls.update(); composer.render(); labelRenderer.render(scene, camera); }
 </script>
 </body>
 </html>
