@@ -1046,14 +1046,14 @@
     "Lot": "Lot_150",
     "Area": 710.0,
     "Price": 106500,
-    "Status": "available",
+    "Status": "reserved",
     "Description": "قطعة سكنية مميزة بأحكام خاصة (طابقين وروف)، تتمتع بواجهة واسعة وإطلالة مرتفعة شمالية ، وتقع على شارع بعرض 10 متر."
   },
   "Lot_151": {
     "Lot": "Lot_151",
     "Area": 710.0,
     "Price": 106500,
-    "Status": "available",
+    "Status": "reserved",
     "Description": "قطعة سكنية مميزة بأحكام خاصة (طابقين وروف)، تتمتع بواجهة واسعة وإطلالة مرتفعة شمالية ، وتقع على شارع بعرض 10 متر."
   },
   "Lot_152": {
@@ -1186,7 +1186,7 @@
     "Lot": "Lot_170",
     "Area": 523.0,
     "Price": 78450,
-    "Status": "available",
+    "Status": "reserved",
     "Description": "قطعة سكنية مميزة بأحكام خاصة (طابقين وروف)،تتمتع بواجهة ومطلة وواسعة شمالية، وتقع على شارع بعرض 12 متر."
   },
   "Lot_171": {
@@ -1319,7 +1319,7 @@
     "Lot": "Lot_189",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "reserved",
     "Description": null
   },
   "Lot_190": {
@@ -1396,7 +1396,7 @@
     "Lot": "Lot_200",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "reserved",
     "Description": null
   },
   "Lot_201": {
