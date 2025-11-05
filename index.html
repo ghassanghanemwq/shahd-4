@@ -62,7 +62,7 @@
   .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--edge);color:#222}
   .chip::before{content:'';width:8px;height:8px;border-radius:50%}
   .chip.avail::before{background:var(--available)}
-  .chip.resv::before{background:var(--reserved)}
+  .chip.resv::before{background:var()}
   .chip.sold::before{background:var(--sold)}
   #hud{position:static;justify-self:center}
   #hud .help{padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--edge);font-size:12px;color:#222;box-shadow:0 6px 18px rgba(0,0,0,.06);opacity:.96}
@@ -358,7 +358,7 @@ function setLotHover(lotId){
   hoveredLotId = lotId;
   if(hoveredLotId && hoveredLotId !== selectedLotId){
     const ms = LOT_MESHES.get(hoveredLotId) || [];
-    ms.forEach(m=>{ m.material?.emissive?.setHex(CONFIG.highlight); m.material.emissiveIntensity = .10; });
+    ms.forEach(m=>{ m.material?.emissive?.setHex(CONFIG.highlight); m.material.emissiveIntensity = .6; });
   }
 }
 
@@ -434,7 +434,7 @@ function recolorByStatus(){
     else if(s.startsWith('res')) base = '#9ad8ff';
     meshes.forEach(o=>{
       const mat = (o.material && o.material.clone()) || new THREE.MeshStandardMaterial();
-      mat.color.set(base); mat.metalness = 0.1; mat.roughness = 0.5;
+      mat.color.set(base); mat.metalness = 0.4; mat.roughness = 0.5;
       o.material = mat;
     });
   });
