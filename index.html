@@ -373,6 +373,8 @@
       <p class="muted">Tap a lot or use search.</p>
       <div class="row"><div class="muted">Lot</div><div id="lotId">—</div></div>
       <div class="row"><div class="muted">Area</div><div id="area">—</div></div>
+      <div class="row"><div class="muted">Length</div><div id="length">—</div></div>
+      <div class="row"><div class="muted">Width</div><div id="width">—</div></div>
       <div class="row"><div class="muted">Price</div><div id="price">—</div></div>
       <div class="row"><div class="muted">Status</div><div id="status"><span class="chip">—</span></div></div>
       <div class="row"><div class="muted">Description</div><div id="notes">—</div></div>
@@ -417,6 +419,8 @@ const drawerToggle = document.getElementById('drawerToggle');
 const menuBtn = document.getElementById('menu');
 const lotIdEl = document.getElementById('lotId');
 const areaEl  = document.getElementById('area');
+const lengthEl = document.getElementById('length');
+const widthEl  = document.getElementById('width');
 const priceEl = document.getElementById('price');
 const statusEl= document.getElementById('status');
 const notesEl = document.getElementById('notes');
@@ -577,6 +581,8 @@ function normalize(){
       LOTS[k] = {
         area: v.Area ?? null,
         unit: 'm²',
+        length: v.Length ?? null,
+        width: v.Width ?? null,
         price: v.Price ?? null,
         status: v.Status ? String(v.Status).toLowerCase() : null,
         notes: v.Description ?? null,
@@ -666,6 +672,8 @@ function showDetails(idOrName){
 
   lotIdEl.textContent = display.replace(/^lot_/i,'');
   areaEl.textContent  = d?.area ? `${Number(d.area).toLocaleString()} ${d.unit||'m²'}` : '—';
+  lengthEl.textContent = d?.length ? `${Number(d.length).toLocaleString()} m` : '—';
+  widthEl.textContent  = d?.width ? `${Number(d.width).toLocaleString()} m` : '—';
   priceEl.textContent = (typeof d?.price === 'number')
     ? `JOD ${Math.round(Number(d.price)).toLocaleString('en-JO')}`
     : '—';
