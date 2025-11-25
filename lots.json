@@ -192,7 +192,7 @@
     "Lot": "Lot_022",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -219,7 +219,7 @@
     "Lot": "Lot_025",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -228,7 +228,7 @@
     "Lot": "Lot_026",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -237,7 +237,7 @@
     "Lot": "Lot_027",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -246,7 +246,7 @@
     "Lot": "Lot_028",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -255,7 +255,7 @@
     "Lot": "Lot_029",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -264,7 +264,7 @@
     "Lot": "Lot_030",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -273,7 +273,7 @@
     "Lot": "Lot_031",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -282,7 +282,7 @@
     "Lot": "Lot_032",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -291,7 +291,7 @@
     "Lot": "Lot_033",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -300,7 +300,7 @@
     "Lot": "Lot_034",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -309,7 +309,7 @@
     "Lot": "Lot_035",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -318,7 +318,7 @@
     "Lot": "Lot_036",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -327,7 +327,7 @@
     "Lot": "Lot_037",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -336,7 +336,7 @@
     "Lot": "Lot_038",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -345,7 +345,7 @@
     "Lot": "Lot_039",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -354,7 +354,7 @@
     "Lot": "Lot_040",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -363,7 +363,7 @@
     "Lot": "Lot_041",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -372,7 +372,7 @@
     "Lot": "Lot_042",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "Reserved",
     "Description": null,
     "Length": null,
     "Width": null
@@ -1353,7 +1353,7 @@
     "Lot": "Lot_151",
     "Area": 710.0,
     "Price": 106500,
-    "Status": "reserved",
+    "Status": "available",
     "Description": "قطعة سكنية مميزة بأحكام خاصة (طابقين وروف)، تتمتع بواجهة واسعة وإطلالة مرتفعة شمالية ، وتقع على شارع بعرض 10 متر.",
     "Length": 31.69,
     "Width": 23.11
@@ -1794,7 +1794,7 @@
     "Lot": "Lot_200",
     "Area": null,
     "Price": null,
-    "Status": "reserved",
+    "Status": "available",
     "Description": null,
     "Length": null,
     "Width": null
