@@ -345,7 +345,7 @@
     "Lot": "Lot_039",
     "Area": null,
     "Price": null,
-    "Status": "Reserved",
+    "Status": "sold",
     "Description": null,
     "Length": null,
     "Width": null
@@ -354,7 +354,7 @@
     "Lot": "Lot_040",
     "Area": null,
     "Price": null,
-    "Status": "Reserved",
+    "Status": "sold",
     "Description": null,
     "Length": null,
     "Width": null
@@ -363,7 +363,7 @@
     "Lot": "Lot_041",
     "Area": null,
     "Price": null,
-    "Status": "Reserved",
+    "Status": "sold",
     "Description": null,
     "Length": null,
     "Width": null
