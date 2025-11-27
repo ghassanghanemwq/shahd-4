@@ -39,7 +39,7 @@
     "Lot": "Lot_005",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "available",
     "Description": null,
     "Length": null,
     "Width": null
@@ -84,7 +84,7 @@
     "Lot": "Lot_010",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "available",
     "Description": null,
     "Length": null,
     "Width": null
@@ -1803,7 +1803,7 @@
     "Lot": "Lot_201",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "available",
     "Description": null,
     "Length": null,
     "Width": null
@@ -1812,7 +1812,7 @@
     "Lot": "Lot_202",
     "Area": null,
     "Price": null,
-    "Status": "sold",
+    "Status": "available",
     "Description": null,
     "Length": null,
     "Width": null
